@@ -10,6 +10,6 @@ use vector::Vec3;
 fn main() {
     let a = Vec3::new(2.0, -1.0, 1.0);
     let b = Vec3::new(0.0, 1.0, 4.0);
-    let dp = ray::cross(&a, &b);
+    let dp = a.cross(&b);
     println!("Dot product is {}, {}, {}", dp.x, dp.y, dp.z);
 }
