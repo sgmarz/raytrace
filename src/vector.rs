@@ -1,9 +1,9 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign, Div, DivAssign, Index, IndexMut};
-
+use crate::matrix::Mat3;
 pub struct Vec3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64
+    x: f64,
+    y: f64,
+    z: f64
 }
 
 impl Vec3 {
@@ -36,6 +36,22 @@ impl Vec3 {
             y: self.y / l,
             z: self.z / l
         }
+    }
+
+    pub fn mul_mat(&self, mat: &Mat3) -> Vec3 {
+        mat.mul_vec(self)
+    }
+
+    pub fn get_x(&self) -> f64 {
+        self.x
+    }
+
+    pub fn get_y(&self) -> f64 {
+        self.y
+    }
+
+    pub fn get_z(&self) -> f64 {
+        self.z
     }
 }
 
@@ -100,7 +116,8 @@ impl Index<usize> for Vec3 {
         match index {
             0 => &self.x,
             1 => &self.y,
-            _ => &self.z
+            2 => &self.z,
+            _ => panic!("Vector index out of bounds: {} / 3", index)
         }
     }
 }
@@ -110,7 +127,8 @@ impl IndexMut<usize> for Vec3 {
         match index {
             0 => &mut self.x,
             1 => &mut self.y,
-            _ => &mut self.z
+            2 => &mut self.z,
+            _ => panic!("Vector index out of bounds: {} / 3", index)
         }
     }
 }
