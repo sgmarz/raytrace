@@ -12,17 +12,21 @@ impl Color {
             red, green, blue
         }
     }
-    pub fn get_red(&self) -> f64 {
-        self.red
+
+    pub fn conv_red(&self, intensity: u8) -> u8 {
+        (self.red * intensity as f64) as u8
     }
-    pub fn get_green(&self) -> f64 {
-        self.green
+
+    pub fn conv_green(&self, intensity: u8) -> u8 {
+        (self.green * intensity as f64) as u8
     }
-    pub fn get_blue(&self) -> f64 {
-        self.blue
+
+    pub fn conv_blue(&self, intensity: u8) -> u8 {
+        (self.blue * intensity as f64) as u8
     }
+
     pub fn lerp(&self, t: f64) -> Color {
-        Color::new((1.0 - t) * 1.0 + t * self.get_red(), (1.0 - t) * 1.0 + t * self.get_green(), (1.0 - t) * 1.0 + t * self.get_blue())
+        Color::new((1.0 - t) * 1.0 + t * self.red, (1.0 - t) * 1.0 + t * self.green, (1.0 - t) * 1.0 + t * self.blue)
     }
 }
 
@@ -54,6 +58,29 @@ impl IndexMut<usize> for Color {
             0 => &mut self.red,
             1 => &mut self.green,
             2 => &mut self.blue,
+            _ => panic!("Invalid color index {}", idx)
+        }
+    }
+}
+
+impl Index<&str> for Color {
+    type Output = f64;
+    fn index(&self, idx: &str) -> &Self::Output {
+        match idx {
+            "red" => &self.red,
+            "green" => &self.green,
+            "blue" => &self.blue,
+            _ => panic!("Invalid color index {}", idx)
+        }
+    }
+}
+
+impl IndexMut<&str> for Color {
+    fn index_mut(&mut self, idx: &str) -> &mut Self::Output {
+        match idx {
+            "red" => &mut self.red,
+            "green" => &mut self.green,
+            "blue" => &mut self.blue,
             _ => panic!("Invalid color index {}", idx)
         }
     }

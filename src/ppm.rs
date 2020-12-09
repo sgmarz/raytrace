@@ -1,10 +1,10 @@
 use crate::pict::Picture;
-use crate::pixel::Pixel;
+use crate::color::Color;
 use std::fs::File;
 use std::io::{BufWriter, Error, Write};
 
 pub struct Row {
-    cols: Vec<Pixel>
+    cols: Vec<Color>
 }
 
 impl Default for Row {
@@ -48,7 +48,7 @@ impl PpmPicture {
             let mut num_pixels: usize = 0;
             for row in self.rows.iter() {
                 for pixel in row.cols.iter() {
-                    write!(wd, "{} {} {}", pixel.get_red(), pixel.get_green(), pixel.get_blue())?;
+                    write!(wd, "{} {} {}", pixel.conv_red(255), pixel.conv_green(255), pixel.conv_blue(255))?;
                     i += 1;
                     num_pixels += 1;
                     if i > 10 {
@@ -70,15 +70,15 @@ impl PpmPicture {
 }
 
 impl Picture for PpmPicture {
-    fn get_pixel(&self, x: u32, y: u32) -> Pixel {
+    fn get_pixel(&self, x: u32, y: u32) -> Color {
         let p = &self.rows[y as usize].cols[x as usize];
-        Pixel::new(p.get_red(), p.get_green(), p.get_blue())
+        Color::new(p[0], p[1], p[2])
     }
-    fn set_pixel(&mut self, x: u32, y: u32, pixel: &Pixel) {
+    fn set_pixel(&mut self, x: u32, y: u32, pixel: &Color) {
         let p = &mut self.rows[y as usize].cols[x as usize];
-        p.set_red(pixel.get_red());
-        p.set_green(pixel.get_green());
-        p.set_blue(pixel.get_blue());
+        p[0] = pixel[0];
+        p[1] = pixel[1];
+        p[2] = pixel[2];
     }
     fn get_width(&self) -> u32 {
         self.width

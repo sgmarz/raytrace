@@ -8,9 +8,9 @@ pub struct Mat3 {
 
 impl Mat3 {
     pub fn mul_vec(&self, vec: &Vec3) -> Vec3 {
-        Vec3::new(self.m[0] * vec.get_x() + self.m[1] * vec.get_y() + self.m[2] * vec.get_z(),
-            self.m[3] * vec.get_x() + self.m[4] * vec.get_y() + self.m[5] * vec.get_z(),
-            self.m[6] * vec.get_x() + self.m[7] * vec.get_y() + self.m[8] * vec.get_z())
+        Vec3::new(self.m[0] * vec[0] + self.m[1] * vec[1] + self.m[2] * vec[2],
+            self.m[3] * vec[0] + self.m[4] * vec[1] + self.m[5] * vec[2],
+            self.m[6] * vec[0] + self.m[7] * vec[1] + self.m[8] * vec[2])
     }
     pub fn translate(&mut self, x: f64, y: f64, z: f64) {
         self[2] += x;
@@ -21,14 +21,9 @@ impl Mat3 {
 
 impl Default for Mat3 {
     fn default() -> Self {
-        let mut s = Self {
-            m: [0.0; 9]
-        };
-        // Set the identities across the diagonal
-        s.m[0] = 1.0;
-        s.m[4] = 1.0; 
-        s.m[8] = 1.0;
-        s
+        Self {
+            m: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        }
     }
 }
 

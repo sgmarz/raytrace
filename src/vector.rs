@@ -38,20 +38,19 @@ impl Vec3 {
         }
     }
 
-    pub fn mul_mat(&self, mat: &Mat3) -> Vec3 {
+    pub fn clamp(&self, val_low: f64, val_high: f64) -> Self {
+        let x = if self.x < val_low { val_low } else if self.x > val_high { val_high } else { self.x };
+        let y = if self.y < val_low { val_low } else if self.y > val_high { val_high } else { self.y };
+        let z = if self.z < val_low { val_low } else if self.z > val_high { val_high } else { self.z };
+        Self {
+            x,
+            y,
+            z
+        }
+    }
+
+    pub fn mul_mat(&self, mat: &Mat3) -> Self {
         mat.mul_vec(self)
-    }
-
-    pub fn get_x(&self) -> f64 {
-        self.x
-    }
-
-    pub fn get_y(&self) -> f64 {
-        self.y
-    }
-
-    pub fn get_z(&self) -> f64 {
-        self.z
     }
 }
 
