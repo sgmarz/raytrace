@@ -132,3 +132,25 @@ impl IndexMut<usize> for Vec3 {
     }
 }
 
+impl Index<&str> for Vec3 {
+    type Output = f64;
+    fn index(&self, index: &str) -> &Self::Output {
+        match index {
+            "x" => &self.x,
+            "y" => &self.y,
+            "z" => &self.z,
+            _ => panic!("Vector index out of bounds: {} / 3", index)
+        }
+    }
+}
+
+impl IndexMut<&str> for Vec3 {
+    fn index_mut(&mut self, index: &str) -> &mut f64 {
+        match index {
+            "x" => &mut self.x,
+            "y" => &mut self.y,
+            "z" => &mut self.z,
+            _ => panic!("Vector index out of bounds: {} / 3", index)
+        }
+    }
+}
