@@ -48,7 +48,8 @@ impl PpmPicture {
             let mut num_pixels: usize = 0;
             for row in self.rows.iter() {
                 for pixel in row.cols.iter() {
-                    write!(wd, "{} {} {}", pixel.conv_red(255), pixel.conv_green(255), pixel.conv_blue(255))?;
+                    let px = pixel.convert(255);
+                    write!(wd, "{} {} {}", px.0, px.1, px.2)?;
                     i += 1;
                     num_pixels += 1;
                     if i > 10 {
