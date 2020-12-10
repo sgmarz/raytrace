@@ -1,5 +1,5 @@
 
-use crate::color::Color;
+use crate::vector::Color;
 
 pub trait Picture {
     fn get_pixel(&self, x: u32, y: u32) -> Color;

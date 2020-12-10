@@ -1,7 +1,8 @@
 use crate::pict::Picture;
-use crate::color::Color;
+use std::vec::Vec;
 use std::fs::File;
 use std::io::{BufWriter, Error, Write};
+use crate::vector::Color;
 
 pub struct Row {
     cols: Vec<Color>
@@ -48,8 +49,8 @@ impl PpmPicture {
             let mut num_pixels: usize = 0;
             for row in self.rows.iter() {
                 for pixel in row.cols.iter() {
-                    let px = pixel.convert(255);
-                    write!(wd, "{} {} {}", px.0, px.1, px.2)?;
+                    let px = (pixel["r"] * 255.0, pixel["g"] * 255.0, pixel["b"] * 255.0); 
+                    write!(wd, "{} {} {}", px.0 as u8, px.1 as u8, px.2 as u8)?;
                     i += 1;
                     num_pixels += 1;
                     if i > 10 {

@@ -1,5 +1,7 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign, Div, DivAssign, Index, IndexMut};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Div, DivAssign, Index, IndexMut, Sub, SubAssign};
 use crate::matrix::Mat3;
+
+#[derive(Copy, Clone)]
 pub struct Vec3 {
     x: f64,
     y: f64,
@@ -12,7 +14,23 @@ impl Vec3 {
             x, y, z
         }
     }
+
+    pub fn new_scalar(v: f64) -> Self {
+        Self {
+            x: v,
+            y: v,
+            z: v
+        }
+    }
     
+    pub fn mul_scalar(&self, v: f64) -> Self {
+        Self {
+            x: self["x"] * v,
+            y: self["y"] * v,
+            z: self["z"] * v
+        }
+    }
+
     pub fn dot(&self, rhs: &Vec3) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z    
     }
@@ -50,7 +68,11 @@ impl Vec3 {
     }
 
     pub fn mul_mat(&self, mat: &Mat3) -> Self {
-        mat.mul_vec(self)
+        Self {
+            x: self.x * mat[0] + self.y * mat[1] + self.z * mat[2],
+            y: self.x * mat[3] + self.y * mat[4] + self.z * mat[5],
+            z: self.x * mat[6] + self.y * mat[7] + self.z * mat[8]
+        }
     }
 }
 
@@ -76,6 +98,21 @@ impl AddAssign for Vec3 {
         self.x += other.x;
         self.y += other.y;
         self.z += other.z;
+    }
+}
+
+impl Sub for Vec3 {
+    type Output = Self;
+    fn sub(self, other: Self) -> Self::Output {
+        Self::new(self.x - other.x, self.y - other.y, self.z - other.z)
+    }
+}
+
+impl SubAssign for Vec3 {
+    fn sub_assign(&mut self, other: Self) {
+        self.x -= other.x;
+        self.y -= other.y;
+        self.z -= other.z;
     }
 }
 
@@ -136,9 +173,9 @@ impl Index<&str> for Vec3 {
     type Output = f64;
     fn index(&self, index: &str) -> &Self::Output {
         match index {
-            "x" => &self.x,
-            "y" => &self.y,
-            "z" => &self.z,
+            "x" | "r" | "red" => &self.x,
+            "y" | "g" | "green"=> &self.y,
+            "z" | "b" | "blue" => &self.z,
             _ => panic!("Vector index out of bounds: {} / 3", index)
         }
     }
@@ -147,10 +184,13 @@ impl Index<&str> for Vec3 {
 impl IndexMut<&str> for Vec3 {
     fn index_mut(&mut self, index: &str) -> &mut f64 {
         match index {
-            "x" => &mut self.x,
-            "y" => &mut self.y,
-            "z" => &mut self.z,
+            "x" | "r" | "red" => &mut self.x,
+            "y" | "g" | "green"=> &mut self.y,
+            "z" | "b" | "blue" => &mut self.z,
             _ => panic!("Vector index out of bounds: {} / 3", index)
         }
     }
 }
+
+pub type Point3 = Vec3;
+pub type Color = Vec3;
