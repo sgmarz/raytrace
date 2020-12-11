@@ -22,7 +22,7 @@ impl Ray {
     }
 
     pub fn trace(&self) -> Color {
-        if let Some(t) = hit_sphere(&Vec3::new(0.0,0.0,-1.0), 0.5, self) {
+        if let Some(t) = hit_sphere(&Vec3::new(0.25,0.0,-2.0), 0.5, self) {
             let n = (self.at(t) - Vec3::new(0.0,0.0,-1.0)).normalize();
             Vec3::new(0.5 * (n[0] + 1.0), 0.5 * (n[1] + 1.0), 0.5 * (n[2] + 1.0))
         }

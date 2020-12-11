@@ -1,7 +1,7 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign, Div, DivAssign, Index, IndexMut, Sub, SubAssign};
 use crate::matrix::Mat3;
 
-// #[derive(Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Vec3 {
     x: f64,
     y: f64,
