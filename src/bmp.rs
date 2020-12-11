@@ -4,7 +4,6 @@ use std::fs::File;
 use std::io::{BufWriter, Error, Write};
 use crate::vector::Color;
 use std::mem::size_of;
-use std::boxed::Box;
 
 pub struct Row {
     cols: Vec<Color>
