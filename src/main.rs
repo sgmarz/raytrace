@@ -2,17 +2,19 @@
 pub mod pict;
 pub mod ray;
 pub mod ppm;
+pub mod bmp;
 pub mod vector;
 pub mod matrix;
+pub mod camera;
 
 use crate::vector::{Point3, Vec3};
 use crate::ray::Ray;
-use crate::ppm::PpmPicture;
+use crate::bmp::BmpPicture;
 use crate::pict::Picture;
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 480u32;
+    let image_width = 481u32;
     let image_height = (image_width as f64 / aspect_ratio) as u32;
 
     let viewport_height = 2.0;
@@ -26,9 +28,9 @@ fn main() {
 
     let lower_left_corner = origin - horizontal / v2 - vertical / v2 - Vec3::new(0.0, 0.0, focal_length);
 
-    let mut ppm = PpmPicture::new(image_width, image_height, 255);
+    let mut ppm = BmpPicture::new(image_width, image_height);
 
-    for i in (0..image_height).rev() {
+    for i in 0..image_height {
         for j in 0..image_width {
             let u = i as f64 / (image_width as f64 - 1.0);
             let v = j as f64 / (image_height as f64 - 1.0);
@@ -41,8 +43,11 @@ fn main() {
         }
     }
 
-    if let Err(_) = ppm.write_file("rayt.ppm") {
-        println!("Unable to write to PPM file.");
+    if let Ok(px) = ppm.write_file("rayt.bmp") {
+        println!("Wrote {} bytes to rayt.bmp.", px);
+    }
+    else {
+        println!("Unable to write to file.");
     }
 
 }

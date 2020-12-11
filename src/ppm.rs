@@ -63,6 +63,7 @@ impl PpmPicture {
                 }
             }
             write!(wd, "\n")?;
+            wd.flush()?;
             Ok(num_pixels)
         }
         else {
