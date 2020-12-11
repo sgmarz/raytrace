@@ -106,10 +106,7 @@ impl BmpPicture {
         let mut wd = BufWriter::new(File::create(fname)?);
         let row_bytes = self.width as usize * 3;
         let padding = if row_bytes % 4 != 0 { 4 - row_bytes % 4 } else { 0 };
-        let mut buffer = Vec::<u8>::new();
-        buffer.resize_with(size_of::<BitmapHeaders>(), || { 0 });
-
-
+        let mut buffer = { let mut v = Vec::<u8>::new(); v.resize_with(size_of::<BitmapHeaders>(), Default::default); v };
         let mut header = unsafe { (buffer.as_mut_ptr() as *mut BitmapHeaders).as_mut().unwrap() };
         let mut bytes_written = 0;
 
@@ -145,7 +142,6 @@ impl BmpPicture {
                 write!(wd, "\x00")?;
             }
         }
-        println!("{} bytes of padding.", padding);
         wd.flush()?;
         Ok(bytes_written)
     }

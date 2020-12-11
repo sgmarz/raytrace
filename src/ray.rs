@@ -14,12 +14,6 @@ impl Ray {
         }
     }
 
-    pub fn at(&self, coeff: f64) -> Vec3 {
-        Vec3::new(self.origin["x"] + coeff * self.origin["x"],
-            self.origin["y"] + coeff * self.origin["y"],
-            self.origin["z"] + coeff * self.origin["z"])
-    }
-
     pub fn trace(&self) -> Color {
         let dir = self.direction.normalize();
         let t = 0.5 * (dir["y"] + 1.0);
