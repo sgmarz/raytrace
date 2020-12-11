@@ -1,7 +1,7 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign, Div, DivAssign, Index, IndexMut, Sub, SubAssign};
 use crate::matrix::Mat3;
 
-#[derive(Copy, Clone)]
+// #[derive(Copy, Clone)]
 pub struct Vec3 {
     x: f64,
     y: f64,
@@ -73,6 +73,22 @@ impl Vec3 {
             y: self.x * mat[3] + self.y * mat[4] + self.z * mat[5],
             z: self.x * mat[6] + self.y * mat[7] + self.z * mat[8]
         }
+    }
+
+    pub fn radd(&self, other: &Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
+    }
+
+    pub fn rsub(&self, other: &Self) -> Self {
+        Self::new(self.x - other.x, self.y - other.y, self.z - other.z)
+    }
+
+    pub fn rmul(&self, other: &Self) -> Self {
+        Self::new(self.x * other.x, self.y * other.y, self.z * other.z)
+    }
+
+    pub fn rdiv(&self, other: &Self) -> Self {
+        Self::new(self.x / other.x, self.y / other.y, self.z / other.z)
     }
 }
 

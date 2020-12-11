@@ -22,8 +22,7 @@ impl Ray {
     }
 
     pub fn trace(&self) -> Color {
-        let t = hit_sphere(&Vec3::new(0.0,0.0,-1.0), 0.5, self);
-        if t > 0.0 {
+        if let Some(t) = hit_sphere(&Vec3::new(0.0,0.0,-1.0), 0.5, self) {
             let n = (self.at(t) - Vec3::new(0.0,0.0,-1.0)).normalize();
             Vec3::new(0.5 * (n[0] + 1.0), 0.5 * (n[1] + 1.0), 0.5 * (n[2] + 1.0))
         }
@@ -31,22 +30,22 @@ impl Ray {
             let dir = self.direction.normalize();
             let t = 0.5 * (dir["y"] + 1.0);
             let c0 = Color::new(1.0 - t, 1.0 - t, 1.0 - t);
-            let c1 = Color::new(t * 0.5, t * 0.7, t * 1.0);
-            c0 * c1
+            let c1 = Color::new(0.0, 0.0, t);
+            c0 + c1
         }
     }
 }
 
-fn hit_sphere(center: &Vec3, radius: f64, ray: &Ray) -> f64 {
-    let oc = ray.origin - *center;
+fn hit_sphere(center: &Vec3, radius: f64, ray: &Ray) -> Option<f64> {
+    let oc = ray.origin.rsub(center);
     let a = ray.direction.dot(&ray.direction);
     let b = 2.0 * oc.dot(&ray.direction);
-    let c = oc.dot(&oc) - radius*radius;
-    let discriminant = b*b - 4.0*a*c;
-    if discriminant < 0.0 {
-        -1.0
+    let c = oc.dot(&oc) - radius * radius;
+    let d = b * b - 4.0 * a * c;
+    if d < 0.0 {
+        None
     } else {
-        (-b - discriminant.sqrt() ) / (2.0*a)
+        Some((-b - d.sqrt() ) / (2.0 * a))
     }
 }
 
