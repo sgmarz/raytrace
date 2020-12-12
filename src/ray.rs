@@ -1,5 +1,6 @@
 
 use crate::vector::{Color, Vec3};
+use crate::hitable::Hitable;
 
 pub struct Ray {
     pub origin: Vec3,
@@ -21,32 +22,8 @@ impl Ray {
             )
     }
 
-    pub fn trace(&self) -> Color {
-        if let Some(t) = hit_sphere(&Vec3::new(0.25,0.0,-2.0), 0.5, self) {
-            let n = (self.at(t) - Vec3::new(0.0,0.0,-1.0)).normalize();
-            Vec3::new(0.5 * (n[0] + 1.0), 0.5 * (n[1] + 1.0), 0.5 * (n[2] + 1.0))
-        }
-        else {
-            let dir = self.direction.normalize();
-            let t = 0.5 * (dir["y"] + 1.0);
-            let c0 = Color::new(1.0 - t, 1.0 - t, 1.0 - t);
-            let c1 = Color::new(0.0, 0.0, t);
-            c0 + c1
-        }
+    pub fn color(&self, rec: &Surface) -> Color {
+        let clr = Vec3::new_scalar(0.5).rmul(&rec.normal.radd(&Vec3::new(1.0, 1.0, 1.0)));
+        clr
     }
 }
-
-fn hit_sphere(center: &Vec3, radius: f64, ray: &Ray) -> Option<f64> {
-    let oc = ray.origin.rsub(center);
-    let a = ray.direction.dot(&ray.direction);
-    let b = 2.0 * oc.dot(&ray.direction);
-    let c = oc.dot(&oc) - radius * radius;
-    let d = b * b - 4.0 * a * c;
-    if d < 0.0 {
-        None
-    } else {
-        Some((-b - d.sqrt() ) / (2.0 * a))
-    }
-}
-
-

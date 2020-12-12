@@ -8,13 +8,15 @@ pub mod matrix;
 pub mod camera;
 pub mod threadpool;
 pub mod scene;
-pub mod surface;
+pub mod hitable;
+pub mod material;
 pub mod sphere;
 
 use crate::vector::Vec3;
 use crate::picture::Picture;
 use crate::bmp::BmpPicture;
 use crate::camera::Camera;
+use crate::scene::Scene;
 use std::sync::Arc;
 
 use std::env;
@@ -41,6 +43,7 @@ fn main() {
     let viewport_width = aspect_ratio * viewport_height;
 
     let camera = Arc::new(Camera::new(&Vec3::default(), viewport_width, viewport_height));
+    let scene = Arc::new(Scene::default());
     let mut pictwrite = BmpPicture::new(image_width, image_height);
 
     let mut tp = threadpool::ThreadPool::new(NUM_THREADS);
@@ -50,7 +53,7 @@ fn main() {
         for i in 0..image_width {
             let u = i as f64 / iw;
             let v = j as f64 / ih;
-            tp.run_c(i, j, u, v, camera.clone());
+            tp.run_c(i, j, u, v, camera.clone(), scene.clone());
         }
         eprint!("\rTraced row {:4} / {:4}", j+1, image_height);
     }

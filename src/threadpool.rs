@@ -5,6 +5,7 @@ use std::sync::Arc;
 use std::sync::mpsc::{Sender, Receiver, channel};
 use std::vec::Vec;
 use crate::camera::Camera;
+use crate::scene::Scene;
 
 pub struct ControlPacket {
     pub row: u32,
@@ -12,17 +13,19 @@ pub struct ControlPacket {
     pub u: f64,
     pub v: f64,
     pub camera: Arc<Camera>,
+    pub objects: Arc<Scene>,
     pub done: bool
 }
 
 impl ControlPacket {
-    pub const fn new(row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>) -> Self {
+    pub const fn new(row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>, objects: Arc<Scene>) -> Self {
         Self {
             row,
             col,
             u,
             v,
             camera,
+            objects,
             done: false
         }
     }
@@ -33,6 +36,7 @@ impl ControlPacket {
             u: 0.0,
             v: 0.0,
             camera: Arc::new(Camera::default()),
+            objects: Arc::new(Scene::default()),
             done: true,
         }
     }
@@ -82,9 +86,12 @@ impl ThreadPool {
                         if packet.done == true {
                             break;
                         }
-                        let color = packet.camera.ray(packet.u, packet.v).trace();
-                        let dp = DataPacket::new(packet.row, packet.col, color);
-                        cws.send(dp).unwrap();
+                        let ray = packet.camera.ray(packet.u, packet.v);
+                        if let Some(sfc) = packet.objects.hit(&ray, 0.0, 9999999.0) {
+                            let color = ray.color(&sfc);
+                            let dp = DataPacket::new(packet.row, packet.col, color);
+                            cws.send(dp).unwrap();
+                        }
                     }
                 }),
                 data: data_r,
@@ -108,8 +115,8 @@ impl ThreadPool {
         }
         res.is_ok()
     }
-    pub fn run_c(&mut self, row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>) -> bool {
-        let cp = ControlPacket::new(row, col, u, v, camera);
+    pub fn run_c(&mut self, row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>, scene: Arc<Scene>) -> bool {
+        let cp = ControlPacket::new(row, col, u, v, camera, scene);
         self.run(cp)
     }
 }
