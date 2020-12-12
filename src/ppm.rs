@@ -1,4 +1,4 @@
-use crate::pict::Picture;
+use crate::picture::Picture;
 use std::vec::Vec;
 use std::fs::File;
 use std::io::{BufWriter, Error, Write};
