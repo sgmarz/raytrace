@@ -21,9 +21,11 @@ impl Sphere {
 impl HitSurface for Sphere {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Surface> {
         let oc = ray.origin.rsub(&self.center);
-        let a = ray.direction.len() * ray.direction.len();
+        let dlen = ray.direction.len();
+        let oclen = oc.len();
+        let a = dlen * dlen;
         let half_b = oc.dot(&ray.direction);
-        let c = oc.len() * oc.len() - self.radius * self.radius;
+        let c = oclen * oclen - self.radius * self.radius;
     
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
@@ -40,10 +42,9 @@ impl HitSurface for Sphere {
                 return None;
             }
         }
-        let mut rec = Surface::default();
-        rec.t = root;
-        rec.point = ray.at(rec.t);
-        rec.normal = (rec.point - self.center) / Vec3::new_scalar(self.radius);
+        let point = ray.at(root);
+        let normal = (point - self.center) / Vec3::new_scalar(self.radius);
+        let rec = Surface::new(point, normal, root);
         Some(rec)
     }
 }
