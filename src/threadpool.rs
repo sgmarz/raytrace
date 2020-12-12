@@ -58,7 +58,8 @@ impl DataPacket {
 pub struct Thread {
     pub thread: JoinHandle<()>,
     pub data: Receiver<DataPacket>,
-    pub control: Sender<ControlPacket>
+    pub control: Sender<ControlPacket>,
+    pub packets_sent: usize
 }
 
 pub struct ThreadPool {
@@ -87,7 +88,8 @@ impl ThreadPool {
                     }
                 }),
                 data: data_r,
-                control: control_s
+                control: control_s,
+                packets_sent: 0
             };
             threads.push(t);
         }
@@ -97,7 +99,8 @@ impl ThreadPool {
         }
     }
     pub fn run(&mut self, control: ControlPacket) -> bool {
-        let t = &self.threads[self.next];
+        let t = &mut self.threads[self.next];
+        t.packets_sent += 1;
         let res = t.control.send(control);
         self.next += 1;
         if self.next >= self.threads.len() {

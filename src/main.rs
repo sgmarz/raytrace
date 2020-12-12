@@ -13,10 +13,9 @@ use crate::picture::Picture;
 use crate::bmp::BmpPicture;
 use crate::camera::Camera;
 use std::sync::Arc;
-use std::sync::mpsc::channel;
 
 use std::env;
-use std::thread::{spawn, JoinHandle};
+
 
 fn main() {
 
@@ -52,9 +51,10 @@ fn main() {
     }
     println!("...done!                    ");
 
-    for _ in 0..image_height {
-        for _ in 0..image_width {
-            
+    for t in tp.threads.drain(..) {
+        for _ in 0..t.packets_sent {
+            let dpacket = t.data.recv().unwrap();
+            pictwrite.set_pixel(dpacket.row, dpacket.col, &dpacket.color);
         }
     }
 
