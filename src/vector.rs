@@ -4,6 +4,7 @@ use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, I
 pub type Color = Vec3;
 pub type Point3 = Vec3;
 
+#[derive(Copy, Clone)]
 pub struct Vec3 {
     coord: [f64; 3]
 }
@@ -54,8 +55,12 @@ impl Vec3 {
         )
     }
 
+    pub fn len2(&self) -> f64 {
+        self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
+    }
+
     pub fn len(&self) -> f64 {
-        (self.x() * self.x() + self.y() * self.y() + self.z() * self.z()).sqrt()
+        self.len2().sqrt()
     }
 
     pub fn unit(&self) -> Self {
