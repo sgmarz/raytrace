@@ -129,7 +129,6 @@ impl BmpPicture {
         wd.write_all(&bufsl)?;
         bytes_written += bufsl.len();
         for row in (0..self.height).rev() {
-            print!("\r{:4} rows remaining.", row);
             for col in 0..self.width {
                 let px = self.get_pixel(col, row);
                 let r = (px["r"] * 255.0) as u8;
@@ -142,7 +141,6 @@ impl BmpPicture {
                 write!(wd, "\x00")?;
             }
         }
-        println!();
         wd.flush()?;
         Ok(bytes_written)
     }
