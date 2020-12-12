@@ -1,4 +1,3 @@
-use crate::picture::Picture;
 use std::vec::Vec;
 use std::fs::File;
 use std::io::{BufWriter, Error, Write};
@@ -130,10 +129,10 @@ impl BmpPicture {
         bytes_written += bufsl.len();
         for row in (0..self.height).rev() {
             for col in 0..self.width {
-                let px = self.get_pixel(col, row);
-                let r = (px["r"] * 255.0) as u8;
-                let g = (px["g"] * 255.0) as u8;
-                let b = (px["b"] * 255.0) as u8;
+                let px = self.get_pixel(col, row) * 255.0;
+                let r = px.r() as u8;
+                let g = px.g() as u8;
+                let b = px.b() as u8;
                 wd.write_all(&[b, g, r])?;
                 bytes_written += 3;
             }
@@ -144,26 +143,24 @@ impl BmpPicture {
         wd.flush()?;
         Ok(bytes_written)
     }
-}
 
-impl Picture for BmpPicture {
-    fn get_pixel(&self, x: u32, y: u32) -> Color {
+    pub fn get_pixel(&self, x: u32, y: u32) -> Color {
         let p = &self.rows[y as usize].cols[x as usize];
         Color::new(p[0], p[1], p[2])
     }
-    fn set_pixel(&mut self, x: u32, y: u32, pixel: &Color) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, pixel: &Color) {
         let p = &mut self.rows[y as usize].cols[x as usize];
         p[0] = pixel[0];
         p[1] = pixel[1];
         p[2] = pixel[2];
     }
-    fn get_width(&self) -> u32 {
+    pub fn get_width(&self) -> u32 {
         self.width
     }
-    fn get_height(&self) -> u32 {
+    pub fn get_height(&self) -> u32 {
         self.height
     }
-    fn resize(&mut self, new_width: u32, new_height: u32) {
+    pub fn resize(&mut self, new_width: u32, new_height: u32) {
         self.width = new_width;
         self.height = new_height;
         let resize_width = || { let mut r = Row::default(); r.resize_width(new_width as usize); r} ;

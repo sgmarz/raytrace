@@ -5,7 +5,6 @@ use std::sync::Arc;
 use std::sync::mpsc::{Sender, Receiver, channel};
 use std::vec::Vec;
 use crate::camera::Camera;
-use crate::scene::Scene;
 
 pub struct ControlPacket {
     pub row: u32,
