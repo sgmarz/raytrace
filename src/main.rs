@@ -20,7 +20,7 @@ use std::sync::Arc;
 use std::env;
 
 const NUM_THREADS: usize = 10;
-const IMAGE_WIDTH: u32 = 1920;
+const IMAGE_WIDTH: u32 = 400;
 
 fn main() {
 
