@@ -16,6 +16,7 @@ use std::sync::Arc;
 
 use std::env;
 
+const NUM_THREADS: usize = 10;
 
 fn main() {
 
@@ -38,7 +39,7 @@ fn main() {
     let camera = Arc::new(Camera::new(&Vec3::default(), viewport_width, viewport_height));
     let mut pictwrite = BmpPicture::new(image_width, image_height);
 
-    let mut tp = threadpool::ThreadPool::new(5);
+    let mut tp = threadpool::ThreadPool::new(NUM_THREADS);
     let ih = image_height as f64 - 1.0;
     let iw = image_width as f64 -1.0;
     for j in 0..image_height {
