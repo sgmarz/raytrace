@@ -7,6 +7,9 @@ pub mod vector;
 pub mod matrix;
 pub mod camera;
 pub mod threadpool;
+pub mod scene;
+pub mod surface;
+pub mod sphere;
 
 use crate::vector::Vec3;
 use crate::picture::Picture;
@@ -17,7 +20,7 @@ use std::sync::Arc;
 use std::env;
 
 const NUM_THREADS: usize = 10;
-const IMAGE_WIDTH: u32 = 320;
+const IMAGE_WIDTH: u32 = 1920;
 
 fn main() {
 
@@ -51,7 +54,7 @@ fn main() {
         }
         eprint!("\rTraced row {:4} / {:4}", j+1, image_height);
     }
-    println!("...done!                    ");
+    eprintln!("...done!                    ");
 
     for t in tp.threads.drain(..) {
         for _ in 0..t.packets_sent {
