@@ -21,8 +21,8 @@ use std::sync::Arc;
 
 use std::env;
 
-const NUM_THREADS: usize = 10;
-const IMAGE_WIDTH: u32 = 400;
+const NUM_THREADS: usize = 5;
+const IMAGE_WIDTH: u32 = 1920;
 
 fn main() {
 
@@ -49,15 +49,15 @@ fn main() {
     let mut tp = threadpool::ThreadPool::new(NUM_THREADS);
     let ih = image_height as f64 - 1.0;
     let iw = image_width as f64 -1.0;
+    print!("Tracing {}x{}...", image_width, image_height);
     for j in 0..image_height {
         for i in 0..image_width {
             let u = i as f64 / iw;
             let v = j as f64 / ih;
             tp.run_c(i, j, u, v, camera.clone(), scene.clone());
         }
-        eprint!("\rTraced row {:4} / {:4}", j+1, image_height);
     }
-    eprintln!("...done!                    ");
+    println!("done!");
 
     for t in tp.threads.drain(..) {
         for _ in 0..t.packets_sent {
