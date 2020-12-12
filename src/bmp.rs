@@ -127,7 +127,7 @@ impl BmpPicture {
         let bufsl = buffer.into_boxed_slice();
         wd.write_all(&bufsl)?;
         bytes_written += bufsl.len();
-        for row in (0..self.height).rev() {
+        for row in 0..self.height {
             for col in 0..self.width {
                 let px = self.get_pixel(col, row) * 255.0;
                 let r = px.r() as u8;

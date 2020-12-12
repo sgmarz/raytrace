@@ -56,8 +56,10 @@ impl Hitable for Sphere {
         }
         let t= root;
         let point = ray.at(t);
-        let normal = (point - self.center()) / self.radius;
-        let rec = HitRecord::new(point, normal, t);
-        Some(rec)
+        let outward_normal = (point - self.center()) / self.radius;
+        let front_face = ray.direction().dot(&outward_normal) < 0.0;
+        let normal = if front_face { outward_normal } else { -outward_normal };
+
+        Some(HitRecord::new(point, normal, t, front_face))
     }
 }
