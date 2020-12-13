@@ -7,10 +7,13 @@ pub struct Camera {
     lower_left_corner: Vec3,
     horizontal: Vec3,
     vertical: Vec3,
+    u: Vec3,
+    v: Vec3,
+    lens_radius: f64
 }
 
 impl Camera {
-    pub fn new(look_from: Vec3, look_at: Vec3, vup: Vec3, vfov: f64, aspect_ratio: f64) -> Self {
+    pub fn new(look_from: Vec3, look_at: Vec3, vup: Vec3, vfov: f64, aspect_ratio: f64, aperature: f64, focus_dist: f64) -> Self {
         let theta = vfov.to_radians();
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h;
@@ -22,15 +25,20 @@ impl Camera {
         let v = w.cross(&u);
 
         let origin = look_from;
-        let horizontal = u * viewport_width;
-        let vertical = v * viewport_height;
-        let lower_left_corner = origin - &(horizontal / 2.0) - &(vertical / 2.0) - &w;
+        let horizontal = u * viewport_width * focus_dist;
+        let vertical = v * viewport_height * focus_dist;
+        let lower_left_corner = origin - &(horizontal / 2.0) - &(vertical / 2.0) - &(w * focus_dist);
+
+        let lens_radius = aperature / 2.0;
 
         Self {
             origin,
             lower_left_corner,
             horizontal,
-            vertical
+            vertical,
+            u,
+            v,
+            lens_radius
         }
     }
 
@@ -39,7 +47,25 @@ impl Camera {
     }
 
     pub fn get_ray(&self, s: f64, t: f64) -> Ray {
-        Ray::new(self.origin().clone(), self.lower_left_corner + &(self.horizontal * s) + &(self.vertical * t) - self.origin())
+        let rd = random_in_unit_disk() * self.lens_radius;
+        let offset = self.u * rd.x() + &(self.v * rd.y());
+        Ray::new(self.origin().clone() + &offset, self.lower_left_corner + &(self.horizontal * s) + &(self.vertical * t) - self.origin() - &offset)
     }
+}
+
+fn random_in_unit_disk() -> Vec3 {
+    loop {
+        let p = Vec3::new(random_double(-1.0, 1.0), random_double(-1.0,1.0), 0.0);
+        if p.len2() >= 1.0 {
+            continue;
+        } 
+        return p;
+    }
+}
+
+fn random_double(min: f64, max: f64) -> f64 {
+    use rand::Rng;
+    let mut r = rand::thread_rng();
+    r.gen_range(min, max)
 }
 
