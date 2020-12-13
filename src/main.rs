@@ -5,11 +5,14 @@ pub mod bmp;
 pub mod ray;
 pub mod objects;
 pub mod hitable;
+pub mod material;
 // pub mod threadpool;
 
 use crate::vector::Vec3;
 use crate::ray::Ray;
 use crate::hitable::HitList;
+use crate::material::Lambertian;
+use crate::material::Material;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::ops::Add;
@@ -32,7 +35,7 @@ fn random_f64() -> f64 {
     r.gen_range(0.0, 1.0)
 }
 
-fn random_in_unit_sphere() -> Vec3 {
+pub fn random_in_unit_sphere() -> Vec3 {
     loop {
         let p = random_vector();
         if p.len2() >= 1.0 {
@@ -42,7 +45,7 @@ fn random_in_unit_sphere() -> Vec3 {
     }
 }
 
-fn random_unit_vector() -> Vec3 {
+pub fn random_unit_vector() -> Vec3 {
     random_in_unit_sphere().unit()
 }
 
@@ -51,8 +54,14 @@ fn ray_color(ray: &Ray, world: &HitList, depth: i32) -> Vec3 {
         Vec3::new(0.0, 0.0, 0.0)
     }
     else if let Some(rec) = world.hit(ray, 0.001, std::f64::INFINITY) {
-        let target = rec.point().add(rec.normal()).add(&random_unit_vector());
-        ray_color(&Ray::new(rec.point().clone(), target - rec.point()), world, depth - 1) * 0.5
+        if let Some ((attenuation, scattered)) = rec.material().scatter(&ray, &rec) {
+            return attenuation * &ray_color(&scattered, world, depth-1);
+        }
+        else {
+            return Vec3::new(0.0,0.0,0.0);
+        }
+        // let target = rec.point().add(rec.normal()).add(&random_unit_vector());
+        // ray_color(&Ray::new(rec.point().clone(), target - rec.point()), world, depth - 1) * 0.5
     }
     else {
         let unit_direction = ray.direction().unit();
@@ -77,10 +86,8 @@ fn main() {
     let image_height = (image_width as f64 / aspect_ratio) as u32;
 
     let mut world = hitable::HitList::new();
-    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.2)));
-    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(1.2, 0.0, -1.0), 0.1)));
-    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Rc::new(Lambertian::new(Vec3::new(0.5, 0.25, 0.75))))));
+    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Rc::new(Lambertian::new(Vec3::new(0.15, 0.20, 0.0))))));
 
     let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;

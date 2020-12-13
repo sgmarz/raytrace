@@ -3,23 +3,28 @@ use crate::hitable::{Hitable, HitRecord};
 use crate::vector::Vec3;
 use crate::ray::Ray;
 use std::ops::{Sub};
+use std::rc::Rc;
+use crate::material::{Material, Lambertian};
+
 
 pub struct Sphere {
     center: Vec3,
-    radius: f64
+    radius: f64,
+    material: Rc<dyn Material>
 }
 
 impl Default for Sphere {
     fn default() -> Self {
-        Self::new(Vec3::new(0.0, 0.0, 0.0), 1.0)
+        Self::new(Vec3::new(0.0, 0.0, 0.0), 1.0, Rc::new(Lambertian::new(Vec3::new(1.0, 1.0, 1.0))))
     }
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64) -> Self {
+    pub fn new(center: Vec3, radius: f64, material: Rc<dyn Material>) -> Self {
         Self {
             center,
-            radius
+            radius,
+            material
         }
     }
 
@@ -59,7 +64,7 @@ impl Hitable for Sphere {
         let outward_normal = (point - self.center()) / self.radius;
         let front_face = ray.direction().dot(&outward_normal) < 0.0;
         let normal = if front_face { outward_normal } else { -outward_normal };
-
-        Some(HitRecord::new(point, normal, t, front_face))
+        let mut ret = HitRecord::new(point, normal, t, front_face, self.material.clone());
+        Some(ret)
     }
 }

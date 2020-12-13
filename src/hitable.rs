@@ -3,23 +3,35 @@ use crate::vector::Vec3;
 use crate::ray::Ray;
 use std::rc::Rc;
 use std::vec::Vec;
+use crate::material::{Material, Lambertian};
 
-#[derive(Default)]
 pub struct HitRecord {
     point: Vec3,
     normal: Vec3,
     t: f64,
+    material: Rc<dyn Material>,
     front_face: bool
 }
 
+impl Default for HitRecord {
+    fn default() -> Self {
+        Self::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), 0.0, false, Rc::new(Lambertian::new(Vec3::new(0.5, 0.25, 0.75))))
+    }
+}
+
 impl HitRecord {
-    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool) -> Self {
+    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool, material: Rc<dyn Material>) -> Self {
         Self {
             point,
             normal,
             t,
-            front_face
+            material,
+            front_face,
         }
+    }
+
+    pub fn material(&self) -> Rc<dyn Material> {
+        self.material.clone()
     }
 
     pub fn point(&self) -> &Vec3 {
