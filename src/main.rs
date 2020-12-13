@@ -11,6 +11,7 @@ use crate::ray::Ray;
 use crate::hitable::HitList;
 use std::rc::Rc;
 use std::ops::Add;
+use std::env::args;
 
 const IMAGE_WIDTH: u32 = 400;
 
@@ -24,9 +25,29 @@ fn random_vector() -> Vec3 {
     Vec3::new(x, y, z)
 }
 
-fn ray_color(ray: &Ray, world: &HitList) -> Vec3 {
-    if let Some(rec) = world.hit(ray, 0.0, std::f64::INFINITY) {
-        rec.normal().add(&Vec3::new(1.0,1.0,1.0)) * 0.5
+fn random_f64() -> f64 {
+    let mut r = rand::thread_rng();
+    r.gen_range(0.0, 1.0)
+}
+
+fn random_in_unit_sphere() -> Vec3 {
+    loop {
+        let p = random_vector();
+        if p.len2() >= 1.0 {
+            continue;
+        }
+        return p;
+    }
+}
+
+fn ray_color(ray: &Ray, world: &HitList, depth: i32) -> Vec3 {
+    if depth <= 0 {
+        Vec3::new(0.0, 0.0, 0.0)
+    }
+    else if let Some(rec) = world.hit(ray, 0.0, std::f64::INFINITY) {
+        // rec.normal().add(&Vec3::new(1.0,1.0,1.0)) * 0.5
+        let target = rec.point().add(&rec.normal().add(&random_in_unit_sphere()));
+        ray_color(&Ray::new(rec.point().clone(), target - rec.point()), world, depth - 1)
     }
     else {
         let unit_direction = ray.direction().unit();
@@ -36,6 +57,15 @@ fn ray_color(ray: &Ray, world: &HitList) -> Vec3 {
 }
 
 fn main() {
+
+    let args: Vec<String> = args().collect();
+
+    if args.len() < 2 {
+        println!("Usage: {} [filename]", args[0]);
+        return;
+    }
+
+    let filename = &args[1];
 
     let aspect_ratio = 16.0 / 9.0;
     let image_width = IMAGE_WIDTH;
@@ -61,15 +91,24 @@ fn main() {
     let ihf = image_height as f64 - 1.0;
 
     for j in 0..image_height {
+        eprint!("\rRow {:4} of {:4}", j, image_height);
         for i in 0..image_width {
-            let u = i as f64 / iwf;
-            let v = j as f64 / ihf;
-            let r = Ray::new(origin, lower_left_corner + &(horizontal * u) + &(vertical * v));
-            let color = ray_color(&r, &world);
+            let mut color = Vec3::new(0.0, 0.0, 0.0);
+            for _ in 0..100 {
+                let u = (random_f64() + i as f64) / iwf;
+                let v = (random_f64() + j as f64) / ihf;
+                let r = Ray::new(origin, lower_left_corner + &(horizontal * u) + &(vertical * v));
+                color += &ray_color(&r, &world, 40);
+            }
             pictwriter.set_pixel(i, j, &color);
         }
     }
-
-    pictwriter.write_file("rayt.bmp").expect("Unable to write to rayt.bmp file.");
+    eprintln!();
+    if let Ok(_) = pictwriter.write_file(filename) {
+        println!("Wrote to file '{}'", filename);
+    }
+    else {
+        println!("Unable to write to file '{}'", filename);
+    }
 
 }
