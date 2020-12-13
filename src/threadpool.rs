@@ -5,6 +5,7 @@ use std::sync::Arc;
 use std::sync::mpsc::{Sender, Receiver, channel};
 use std::vec::Vec;
 use crate::hitable::HitList;
+use crate::camera::Camera;
 
 pub struct ControlPacket {
     pub row: u32,
@@ -13,11 +14,14 @@ pub struct ControlPacket {
     pub v: f64,
     pub camera: Arc<Camera>,
     pub objects: Arc<HitList>,
-    pub done: bool
+    pub done: bool,
+    pub samples: u32,
+    pub image_width: u32,
+    pub image_height: u32
 }
 
 impl ControlPacket {
-    pub const fn new(row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>, objects: Arc<Scene>) -> Self {
+    pub const fn new(row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32) -> Self {
         Self {
             row,
             col,
@@ -25,7 +29,10 @@ impl ControlPacket {
             v,
             camera,
             objects,
-            done: false
+            done: false,
+            samples,
+            image_width,
+            image_height,
         }
     }
     pub fn done() -> Self {
@@ -35,8 +42,11 @@ impl ControlPacket {
             u: 0.0,
             v: 0.0,
             camera: Arc::new(Camera::default()),
-            objects: Arc::new(Scene::default()),
+            objects: Arc::new(HitList::default()),
             done: true,
+            samples: 0,
+            image_width: 0,
+            image_height: 0,
         }
     }
 }
@@ -85,12 +95,18 @@ impl ThreadPool {
                         if packet.done == true {
                             break;
                         }
-                        let ray = packet.camera.ray(packet.u, packet.v);
-                        if let Some(sfc) = packet.objects.hit(&ray, 0.0, 9999999.0) {
-                            let color = ray.color(&sfc);
-                            let dp = DataPacket::new(packet.row, packet.col, color);
-                            cws.send(dp).unwrap();
+                        let iwf = packet.image_width as f64 - 1.0;
+                        let ihf = packet.image_height as f64 - 1.0;
+                        let mut color = Vec3::new(0.0, 0.0, 0.0);
+                        for _ in 0..packet.samples {
+                            let u = (crate::random_f64() + packet.row as f64) / iwf;
+                            let v = (crate::random_f64() + packet.col as f64) / ihf;
+                            let r = packet.camera.get_ray(packet.u, packet.v);
+                            color += &crate::ray_color(&r, &packet.objects, 20);
                         }
+                        let dp = DataPacket::new(packet.row, packet.col, color);
+                        
+                        cws.send(dp).unwrap();
                     }
                 }),
                 data: data_r,
@@ -114,8 +130,8 @@ impl ThreadPool {
         }
         res.is_ok()
     }
-    pub fn run_c(&mut self, row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>, scene: Arc<Scene>) -> bool {
-        let cp = ControlPacket::new(row, col, u, v, camera, scene);
+    pub fn run_c(&mut self, row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32) -> bool {
+        let cp = ControlPacket::new(row, col, u, v, camera, objects, samples, image_width, image_height);
         self.run(cp)
     }
 }

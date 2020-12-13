@@ -7,20 +7,17 @@ pub mod objects;
 pub mod hitable;
 pub mod material;
 pub mod camera;
-// pub mod threadpool;
+pub mod threadpool;
 
 use crate::vector::Vec3;
 use crate::ray::Ray;
 use crate::hitable::HitList;
 use crate::objects::sphere::Sphere;
-use crate::material::{Lambertian, Metal, DiElectric};
+use crate::material::Material;
 use crate::camera::Camera;
-use std::rc::Rc;
-// use std::sync::Arc;
+use std::sync::Arc;
 // use std::ops::Add;
 use std::env::args;
-
-const IMAGE_WIDTH: u32 = 640;
 
 use rand::Rng;
 
@@ -56,7 +53,7 @@ pub fn random_unit_vector() -> Vec3 {
     random_in_unit_sphere().unit()
 }
 
-fn ray_color(ray: &Ray, world: &HitList, depth: i32) -> Vec3 {
+pub fn ray_color(ray: &Ray, world: &HitList, depth: i32) -> Vec3 {
     if depth <= 0 {
         Vec3::new(0.0, 0.0, 0.0)
     }
@@ -67,8 +64,6 @@ fn ray_color(ray: &Ray, world: &HitList, depth: i32) -> Vec3 {
         else {
             return Vec3::new(1.0,1.0,1.0);
         }
-        // let target = rec.point().add(rec.normal()).add(&random_unit_vector());
-        // ray_color(&Ray::new(rec.point().clone(), target - rec.point()), world, depth - 1) * 0.5
     }
     else {
         let unit_direction = ray.direction().unit();
@@ -80,8 +75,8 @@ fn ray_color(ray: &Ray, world: &HitList, depth: i32) -> Vec3 {
 fn random_scene() -> HitList {
     let mut world = HitList::new();
 
-    let ground_material = Rc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
-    world.add(Rc::new(Sphere::new(Vec3::new(0.0,-1000.0,0.0), 1000.0, ground_material)));
+    let ground_material = Material::new_lambertian(Vec3::new(0.5, 0.5, 0.5));
+    world.add(Arc::new(Sphere::new(Vec3::new(0.0,-1000.0,0.0), 1000.0, ground_material)));
 
     for a in -11..11 {
         for b in -11..11 {
@@ -92,32 +87,32 @@ fn random_scene() -> HitList {
                 if choose_mat < 0.8 {
                     // diffuse
                     let albedo = Vec3::new(random_f64(), random_f64(), random_f64()) * &Vec3::new(random_f64(), random_f64(), random_f64());
-                    let sphere_material = Rc::new(Lambertian::new(albedo));
-                    world.add(Rc::new(Sphere::new(center.clone(), 0.2, sphere_material)));
+                    let sphere_material = Material::new_lambertian(albedo);
+                    world.add(Arc::new(Sphere::new(center.clone(), 0.2, sphere_material)));
                 } 
                 else if choose_mat < 0.95 {
                     // metal
                     let albedo = Vec3::new(random_f64(), random_f64(), random_f64());
                     let fuzz = random_double(0.0, 0.5);
-                    let sphere_material = Rc::new(Metal::new(albedo, fuzz));
-                    world.add(Rc::new(Sphere::new(center.clone(), 0.2, sphere_material)));
+                    let sphere_material = Material::new_metal(albedo, fuzz);
+                    world.add(Arc::new(Sphere::new(center.clone(), 0.2, sphere_material)));
                 } else {
                     // glass
-                    let sphere_material = Rc::new(DiElectric::new(1.5));
-                    world.add(Rc::new(Sphere::new(center, 0.2, sphere_material)));
+                    let sphere_material = Material::new_dielectric(1.5);
+                    world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
                 }
             }
         }
     }
 
-    let material1 = Rc::new(DiElectric::new(1.5));
-    world.add(Rc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, material1)));
+    let material1 = Material::new_dielectric(1.5);
+    world.add(Arc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, material1)));
 
-    let material2 = Rc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
-    world.add(Rc::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, material2)));
+    let material2 = Material::new_lambertian(Vec3::new(0.4, 0.2, 0.1));
+    world.add(Arc::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, material2)));
 
-    let material3 = Rc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0));
-    world.add(Rc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, material3)));
+    let material3 = Material::new_metal(Vec3::new(0.7, 0.6, 0.5), 0.0);
+    world.add(Arc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, material3)));
 
     world
 }
@@ -126,18 +121,24 @@ fn main() {
 
     let args: Vec<String> = args().collect();
 
-    if args.len() < 2 {
-        println!("Usage: {} [filename]", args[0]);
+    if args.len() < 5 {
+        println!("Usage: {} [filename] [width] [ratio] [samples] <num threads>", args[0]);
         return;
     }
 
     let filename = &args[1];
+    let image_width = args[2].parse::<u32>().unwrap();
+    let aspect_ratio = args[3].parse::<f64>().unwrap();
+    let samples = args[4].parse::<u32>().unwrap();
+    let mut num_threads = 5usize;
 
-    let aspect_ratio = 3.0 / 2.0;
-    let image_width = IMAGE_WIDTH;
+    if args.len() >= 6 {
+        num_threads = args[5].parse::<usize>().unwrap();
+    }
+
     let image_height = (image_width as f64 / aspect_ratio) as u32;
-    let samples = 50;
-
+    let max_depth = 100;
+    
     let world = random_scene();
     
     let lookfrom = Vec3::new(13.0,2.0,3.0);
@@ -147,7 +148,7 @@ fn main() {
     let aperture = 0.1;
 
     let camera = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
-    // let mut pool = threadpool::ThreadPool::new();
+    let mut pool = threadpool::ThreadPool::new(num_threads);
     let mut pictwriter = bmp::BmpPicture::new(image_width, image_height, samples);
 
     let iwf = image_width as f64 - 1.0;
@@ -161,7 +162,7 @@ fn main() {
                 let u = (random_f64() + i as f64) / iwf;
                 let v = (random_f64() + j as f64) / ihf;
                 let r = camera.get_ray(u, v);
-                color += &ray_color(&r, &world, 20);
+                color += &ray_color(&r, &world, max_depth);
             }
             pictwriter.set_pixel(i, j, &color);
         }

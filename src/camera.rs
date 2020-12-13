@@ -2,6 +2,7 @@
 use crate::vector::Vec3;
 use crate::ray::Ray;
 
+#[derive(Default)]
 pub struct Camera {
     origin: Vec3,
     lower_left_corner: Vec3,

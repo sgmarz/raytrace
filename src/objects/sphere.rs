@@ -2,25 +2,24 @@
 use crate::hitable::{Hitable, HitRecord};
 use crate::vector::Vec3;
 use crate::ray::Ray;
-use std::ops::{Sub};
-use std::rc::Rc;
-use crate::material::{Material, Lambertian};
+use std::ops::Sub;
+use crate::material::Material;
 
 
 pub struct Sphere {
     center: Vec3,
     radius: f64,
-    material: Rc<dyn Material>
+    material: Material
 }
 
 impl Default for Sphere {
     fn default() -> Self {
-        Self::new(Vec3::new(0.0, 0.0, 0.0), 1.0, Rc::new(Lambertian::new(Vec3::new(1.0, 1.0, 1.0))))
+        Self::new(Vec3::new(0.0, 0.0, 0.0), 1.0, Material::new_lambertian(Vec3::new(1.0, 1.0, 1.0)))
     }
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64, material: Rc<dyn Material>) -> Self {
+    pub fn new(center: Vec3, radius: f64, material: Material) -> Self {
         Self {
             center,
             radius,

@@ -1,26 +1,27 @@
 
 use crate::vector::Vec3;
 use crate::ray::Ray;
-use std::rc::Rc;
+// use std::rc::Rc;
+use std::sync::Arc;
 use std::vec::Vec;
-use crate::material::{Material, Lambertian};
+use crate::material::Material;
 
 pub struct HitRecord {
     point: Vec3,
     normal: Vec3,
     t: f64,
-    material: Rc<dyn Material>,
+    material: Material,
     front_face: bool
 }
 
 impl Default for HitRecord {
     fn default() -> Self {
-        Self::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), 0.0, false, Rc::new(Lambertian::new(Vec3::new(0.5, 0.25, 0.75))))
+        Self::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), 0.0, false, Material::new_lambertian(Vec3::new(0.5, 0.25, 0.75)))
     }
 }
 
 impl HitRecord {
-    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool, material: Rc<dyn Material>) -> Self {
+    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool, material: Material) -> Self {
         Self {
             point,
             normal,
@@ -30,8 +31,8 @@ impl HitRecord {
         }
     }
 
-    pub fn material(&self) -> Rc<dyn Material> {
-        self.material.clone()
+    pub fn material(&self) -> &Material {
+        &self.material
     }
 
     pub fn point(&self) -> &Vec3 {
@@ -55,8 +56,9 @@ pub trait Hitable {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
+#[derive(Default)]
 pub struct HitList {
-    objects: Vec<Rc<dyn Hitable>>
+    objects: Vec<Arc<dyn Hitable>>
 }
 
 impl HitList {
@@ -66,7 +68,7 @@ impl HitList {
         }
     }
 
-    pub fn add(&mut self, obj: Rc<dyn Hitable>) {
+    pub fn add(&mut self, obj: Arc<dyn Hitable>) {
         self.objects.push(obj);
     }
 

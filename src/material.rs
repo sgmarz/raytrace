@@ -4,47 +4,68 @@ use crate::hitable::HitRecord;
 use crate::vector::{Color, Vec3};
 use std::ops::{Sub, Add, Mul, Neg};
 
-pub trait Material {
-    fn scatter(&self, ray: &Ray, record: &HitRecord) -> Option<(Vec3, Ray)>;
+// pub trait Material {
+//     fn scatter(&self, ray: &Ray, record: &HitRecord) -> Option<(Vec3, Ray)>;
+// }
+
+#[derive(Copy, Clone)]
+pub enum MaterialType {
+    Lambertian,
+    Metal,
+    DiElectric
 }
 
-pub struct Lambertian {
-    albedo: Vec3
+#[derive(Clone)]
+pub struct Material {
+    material_type: MaterialType,
+    albedo: Vec3,
+    fuzz: f64,
+    ir: f64,
 }
 
-impl Lambertian {
-    pub fn new(albedo: Vec3) -> Self {
+impl Material {
+    pub fn new_lambertian(albedo: Vec3) -> Self {
         Self {
-            albedo
+            material_type: MaterialType::Lambertian,
+            albedo,
+            fuzz: 0.0,
+            ir: 0.0
         }
     }
-}
 
-impl Material for Lambertian {
-    fn scatter(&self, _ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
+    pub fn new_metal(albedo: Vec3, fuzz: f64) -> Self {
+        Self {
+            material_type: MaterialType::Metal,
+            albedo,
+            fuzz: if fuzz < 1.0 { fuzz } else { 1.0 },
+            ir: 0.0
+        }
+    }
+
+    pub fn new_dielectric(ir: f64) -> Self {
+        Self {
+            material_type: MaterialType:: DiElectric,
+            albedo: Vec3::default(),
+            fuzz: 0.0,
+            ir
+        }
+    }
+
+    pub fn scatter(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
+        match self.material_type {
+            MaterialType::Lambertian => self.scatter_lambertian(rec),
+            MaterialType::Metal => self.scatter_metal(ray, rec),
+            MaterialType::DiElectric => self.scatter_dielectric(ray, rec)
+        }
+    }
+
+    fn scatter_lambertian(&self, rec: &HitRecord) -> Option<(Vec3, Ray)> {
         let scatter_direction = rec.normal().add(&crate::random_unit_vector());
         let scattered = Ray::new(rec.point().clone(), scatter_direction);
         Some((self.albedo.clone(), scattered))
     }
-}
 
-
-pub struct Metal {
-    albedo: Vec3,
-    fuzz: f64
-}
-
-impl Metal {
-    pub fn new(albedo: Vec3, fuzz: f64) -> Self {
-        Self {
-            albedo,
-            fuzz: if fuzz < 1.0 { fuzz } else { 1.0 }
-        }
-    }
-}
-
-impl Material for Metal {
-    fn scatter(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
+    fn scatter_metal(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
         let reflected = reflect(&ray.direction().unit(), rec.normal());
         let scattered = Ray::new(rec.point().clone(), reflected + &(crate::random_in_unit_sphere() * self.fuzz));
         let attenuation = self.albedo.clone();
@@ -55,22 +76,8 @@ impl Material for Metal {
             None
         }
     }
-}
 
-pub struct DiElectric {
-    ir: f64
-}
-
-impl DiElectric {
-    pub fn new(ir: f64) -> Self {
-        Self {
-            ir
-        }
-    }
-}
-
-impl Material for DiElectric {
-    fn scatter(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
+    fn scatter_dielectric(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let refraction_ratio = if rec.front_face() { 1.0 / self.ir } else { self.ir };
 
@@ -81,7 +88,6 @@ impl Material for DiElectric {
         Some((attenuation, scattered))
     }
 }
-
 
 fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
     return v.sub(&(n.clone() * v.dot(n) * 2.0));
