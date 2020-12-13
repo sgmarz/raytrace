@@ -64,7 +64,7 @@ impl Hitable for Sphere {
         let outward_normal = (point - self.center()) / self.radius;
         let front_face = ray.direction().dot(&outward_normal) < 0.0;
         let normal = if front_face { outward_normal } else { -outward_normal };
-        let mut ret = HitRecord::new(point, normal, t, front_face, self.material.clone());
-        Some(ret)
+
+        Some(HitRecord::new(point, normal, t, front_face, self.material.clone()))
     }
 }

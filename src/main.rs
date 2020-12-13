@@ -6,16 +6,18 @@ pub mod ray;
 pub mod objects;
 pub mod hitable;
 pub mod material;
+pub mod camera;
 // pub mod threadpool;
 
 use crate::vector::Vec3;
 use crate::ray::Ray;
 use crate::hitable::HitList;
-use crate::material::Lambertian;
-use crate::material::Material;
+use crate::objects::sphere::Sphere;
+use crate::material::{Lambertian, Metal, DiElectric};
+use crate::camera::Camera;
 use std::rc::Rc;
-use std::sync::Arc;
-use std::ops::Add;
+// use std::sync::Arc;
+// use std::ops::Add;
 use std::env::args;
 
 const IMAGE_WIDTH: u32 = 640;
@@ -86,20 +88,18 @@ fn main() {
     let image_height = (image_width as f64 / aspect_ratio) as u32;
 
     let mut world = hitable::HitList::new();
-    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, Rc::new(Lambertian::new(Vec3::new(0.5, 0.25, 0.75))))));
-    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0, Rc::new(Lambertian::new(Vec3::new(0.15, 0.20, 0.0))))));
-
-    let viewport_height = 2.0;
-    let viewport_width = aspect_ratio * viewport_height;
-    let focal_length = 1.0;
-    let focal_length_vector = Vec3::new(0.0, 0.0, focal_length);
-
-    let origin = Vec3::new(0.0, 0.0, 0.0);
-    let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, viewport_height, 0.0);
-    let lower_left_corner = origin - &(horizontal / 2.0) - &(vertical / 2.0) - &focal_length_vector;
-
-
+    let material_ground = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
+    let material_center = Rc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5)));
+    let material_left   = Rc::new(DiElectric::new(1.5));
+    let material_right  = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
+    
+    world.add(Rc::new(Sphere::new(Vec3::new( 0.0, -100.5, -1.0), 100.0, material_ground)));
+    world.add(Rc::new(Sphere::new(Vec3::new( 0.0,    0.0, -1.0),   0.5, material_center)));
+    world.add(Rc::new(Sphere::new(Vec3::new(-1.0,    0.0, -1.0),   0.5, material_left.clone())));
+    world.add(Rc::new(Sphere::new(Vec3::new(-1.0,    0.0, -1.0), -0.45, material_left)));
+    world.add(Rc::new(Sphere::new(Vec3::new( 1.0,    0.0, -1.0),   0.5, material_right)));
+    
+    let camera = Camera::new(Vec3::new(-2.0,2.0,1.0), Vec3::new(0.0,0.0,-1.0), Vec3::new(0.0,1.0,0.0), 20.0, aspect_ratio);
     // let mut pool = threadpool::ThreadPool::new();
     let mut pictwriter = bmp::BmpPicture::new(IMAGE_WIDTH, image_height);
 
@@ -113,8 +113,8 @@ fn main() {
             for _ in 0..10 {
                 let u = (random_f64() + i as f64) / iwf;
                 let v = (random_f64() + j as f64) / ihf;
-                let r = Ray::new(origin, lower_left_corner + &(horizontal * u) + &(vertical * v));
-                color += &ray_color(&r, &world, 40);
+                let r = camera.get_ray(u, v);
+                color += &ray_color(&r, &world, 20);
             }
             pictwriter.set_pixel(i, j, &color);
         }
