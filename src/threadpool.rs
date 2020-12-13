@@ -4,7 +4,7 @@ use std::thread::{spawn, JoinHandle};
 use std::sync::Arc;
 use std::sync::mpsc::{Sender, Receiver, channel};
 use std::vec::Vec;
-use crate::camera::Camera;
+use crate::hitable::HitList;
 
 pub struct ControlPacket {
     pub row: u32,
@@ -12,7 +12,7 @@ pub struct ControlPacket {
     pub u: f64,
     pub v: f64,
     pub camera: Arc<Camera>,
-    pub objects: Arc<Scene>,
+    pub objects: Arc<HitList>,
     pub done: bool
 }
 

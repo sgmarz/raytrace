@@ -5,11 +5,13 @@ pub mod bmp;
 pub mod ray;
 pub mod objects;
 pub mod hitable;
+// pub mod threadpool;
 
 use crate::vector::Vec3;
 use crate::ray::Ray;
 use crate::hitable::HitList;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::ops::Add;
 use std::env::args;
 
@@ -76,6 +78,8 @@ fn main() {
 
     let mut world = hitable::HitList::new();
     world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.2)));
+    world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(1.2, 0.0, -1.0), 0.1)));
     world.add(Rc::new(objects::sphere::Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
 
     let viewport_height = 2.0;
@@ -88,6 +92,8 @@ fn main() {
     let vertical = Vec3::new(0.0, viewport_height, 0.0);
     let lower_left_corner = origin - &(horizontal / 2.0) - &(vertical / 2.0) - &focal_length_vector;
 
+
+    // let mut pool = threadpool::ThreadPool::new();
     let mut pictwriter = bmp::BmpPicture::new(IMAGE_WIDTH, image_height);
 
     let iwf = image_width as f64 - 1.0;
