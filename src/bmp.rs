@@ -89,6 +89,20 @@ struct BitmapHeaders {
     pub bih: BitmapInfoHeader,
 }
 
+fn clamp(val: f64, min: f64, max: f64) -> f64 {
+    if val < min { 
+        min 
+    }
+    else if val > max {
+        max
+    }
+    else {
+        val
+    }
+}
+
+const SCALE: f64 = 1.0 / 10.0;
+
 impl BmpPicture {
     pub fn new(width: u32, height: u32) -> Self {
         let mut r = Self {
@@ -129,10 +143,13 @@ impl BmpPicture {
         bytes_written += bufsl.len();
         for row in 0..self.height {
             for col in 0..self.width {
-                let px = self.get_pixel(col, row) * 255.0;
-                let r = px.r() as u8;
-                let g = px.g() as u8;
-                let b = px.b() as u8;
+                let px = self.get_pixel(col, row);
+                let pxr = SCALE * px.r();
+                let pxg = SCALE * px.g();
+                let pxb = SCALE * px.b();
+                let r = (255.0 * clamp(pxr, 0.0, 1.0)) as u8;
+                let g = (255.0 * clamp(pxg, 0.0, 1.0)) as u8;
+                let b = (255.0 * clamp(pxb, 0.0, 1.0)) as u8;
                 wd.write_all(&[b, g, r])?;
                 bytes_written += 3;
             }

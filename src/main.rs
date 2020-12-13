@@ -13,15 +13,15 @@ use std::rc::Rc;
 use std::ops::Add;
 use std::env::args;
 
-const IMAGE_WIDTH: u32 = 400;
+const IMAGE_WIDTH: u32 = 640;
 
 use rand::Rng;
 
 fn random_vector() -> Vec3 {
     let mut r = rand::thread_rng();
-    let x = r.gen_range(0.0, 1.0);
-    let y = r.gen_range(0.0, 1.0);
-    let z = r.gen_range(0.0, 1.0);
+    let x = r.gen_range(-1.0, 1.0);
+    let y = r.gen_range(-1.0, 1.0);
+    let z = r.gen_range(-1.0, 1.0);
     Vec3::new(x, y, z)
 }
 
@@ -40,19 +40,22 @@ fn random_in_unit_sphere() -> Vec3 {
     }
 }
 
+fn random_unit_vector() -> Vec3 {
+    random_in_unit_sphere().unit()
+}
+
 fn ray_color(ray: &Ray, world: &HitList, depth: i32) -> Vec3 {
     if depth <= 0 {
         Vec3::new(0.0, 0.0, 0.0)
     }
-    else if let Some(rec) = world.hit(ray, 0.0, std::f64::INFINITY) {
-        // rec.normal().add(&Vec3::new(1.0,1.0,1.0)) * 0.5
-        let target = rec.point().add(&rec.normal().add(&random_in_unit_sphere()));
-        ray_color(&Ray::new(rec.point().clone(), target - rec.point()), world, depth - 1)
+    else if let Some(rec) = world.hit(ray, 0.001, std::f64::INFINITY) {
+        let target = rec.point().add(rec.normal()).add(&random_unit_vector());
+        ray_color(&Ray::new(rec.point().clone(), target - rec.point()), world, depth - 1) * 0.5
     }
     else {
         let unit_direction = ray.direction().unit();
         let t = (unit_direction.y() + 1.0) * 0.5;
-        Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + &(random_vector() * t)
+        Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + &(Vec3::new(0.5, 0.7, 1.0) * t)
     }
 }
 
@@ -91,10 +94,10 @@ fn main() {
     let ihf = image_height as f64 - 1.0;
 
     for j in 0..image_height {
-        eprint!("\rRow {:4} of {:4}", j, image_height);
+        eprint!("\rRow {:4} of {:4}", j+1, image_height);
         for i in 0..image_width {
             let mut color = Vec3::new(0.0, 0.0, 0.0);
-            for _ in 0..100 {
+            for _ in 0..10 {
                 let u = (random_f64() + i as f64) / iwf;
                 let v = (random_f64() + j as f64) / ihf;
                 let r = Ray::new(origin, lower_left_corner + &(horizontal * u) + &(vertical * v));
