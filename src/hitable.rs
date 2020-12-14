@@ -58,7 +58,7 @@ pub trait Hitable {
 
 #[derive(Default)]
 pub struct HitList {
-    objects: Vec<Arc<dyn Hitable>>
+    objects: Vec<Arc<dyn Hitable + Send + Sync>>
 }
 
 impl HitList {
@@ -68,7 +68,7 @@ impl HitList {
         }
     }
 
-    pub fn add(&mut self, obj: Arc<dyn Hitable>) {
+    pub fn add(&mut self, obj: Arc<dyn Hitable + Send + Sync>) {
         self.objects.push(obj);
     }
 

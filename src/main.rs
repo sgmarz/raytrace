@@ -137,9 +137,7 @@ fn main() {
     }
 
     let image_height = (image_width as f64 / aspect_ratio) as u32;
-    let max_depth = 100;
-    
-    let world = random_scene();
+    //let max_depth = 100;
     
     let lookfrom = Vec3::new(13.0,2.0,3.0);
     let lookat = Vec3::new(0.0,0.0,0.0);
@@ -147,27 +145,33 @@ fn main() {
     let dist_to_focus = 10.0;
     let aperture = 0.1;
 
-    let camera = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
+    let camera = Arc::new(Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus));
+    let world = Arc::new(random_scene());
     let mut pool = threadpool::ThreadPool::new(num_threads);
     let mut pictwriter = bmp::BmpPicture::new(image_width, image_height, samples);
 
-    let iwf = image_width as f64 - 1.0;
-    let ihf = image_height as f64 - 1.0;
-
     for j in 0..image_height {
-        eprint!("\rRow {:4} of {:4}", j+1, image_height);
         for i in 0..image_width {
-            let mut color = Vec3::new(0.0, 0.0, 0.0);
-            for _ in 0..samples {
-                let u = (random_f64() + i as f64) / iwf;
-                let v = (random_f64() + j as f64) / ihf;
-                let r = camera.get_ray(u, v);
-                color += &ray_color(&r, &world, max_depth);
+            pool.run_c(j, i, camera.clone(), world.clone(), samples, image_width, image_height);
+        }
+    }
+
+    let mut total_sent = 0;
+    let total_reqd = image_width * image_height;
+    for t in pool.threads.drain(..) {
+        for _ in 0..t.packets_sent {
+            let d = t.data.recv().unwrap();
+            pictwriter.set_pixel(d.col, d.row, &d.color);
+            
+            if total_sent % 100 == 0{
+                eprint!("\rWrote {} pixels, {} more to go.               ", total_sent, total_reqd - total_sent);
             }
-            pictwriter.set_pixel(i, j, &color);
+            total_sent += 1;
         }
     }
     eprintln!();
+    eprintln!("Done writing pixels, writing to BMP file.");
+
     if let Ok(_) = pictwriter.write_file(filename) {
         println!("Wrote to file '{}'", filename);
     }

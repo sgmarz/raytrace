@@ -18,6 +18,9 @@ impl Default for Sphere {
     }
 }
 
+unsafe impl Send for Sphere {}
+unsafe impl Sync for Sphere {}
+
 impl Sphere {
     pub fn new(center: Vec3, radius: f64, material: Material) -> Self {
         Self {

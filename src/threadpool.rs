@@ -10,8 +10,6 @@ use crate::camera::Camera;
 pub struct ControlPacket {
     pub row: u32,
     pub col: u32,
-    pub u: f64,
-    pub v: f64,
     pub camera: Arc<Camera>,
     pub objects: Arc<HitList>,
     pub done: bool,
@@ -21,12 +19,10 @@ pub struct ControlPacket {
 }
 
 impl ControlPacket {
-    pub const fn new(row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32) -> Self {
+    pub const fn new(row: u32, col: u32, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32) -> Self {
         Self {
             row,
             col,
-            u,
-            v,
             camera,
             objects,
             done: false,
@@ -39,8 +35,6 @@ impl ControlPacket {
         Self {
             row: 0,
             col: 0,
-            u: 0.0,
-            v: 0.0,
             camera: Arc::new(Camera::default()),
             objects: Arc::new(HitList::default()),
             done: true,
@@ -99,9 +93,9 @@ impl ThreadPool {
                         let ihf = packet.image_height as f64 - 1.0;
                         let mut color = Vec3::new(0.0, 0.0, 0.0);
                         for _ in 0..packet.samples {
-                            let u = (crate::random_f64() + packet.row as f64) / iwf;
-                            let v = (crate::random_f64() + packet.col as f64) / ihf;
-                            let r = packet.camera.get_ray(packet.u, packet.v);
+                            let u = (crate::random_f64() + packet.col as f64) / iwf;
+                            let v = (crate::random_f64() + packet.row as f64) / ihf;
+                            let r = packet.camera.get_ray(u, v);
                             color += &crate::ray_color(&r, &packet.objects, 20);
                         }
                         let dp = DataPacket::new(packet.row, packet.col, color);
@@ -130,8 +124,8 @@ impl ThreadPool {
         }
         res.is_ok()
     }
-    pub fn run_c(&mut self, row: u32, col: u32, u: f64, v: f64, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32) -> bool {
-        let cp = ControlPacket::new(row, col, u, v, camera, objects, samples, image_width, image_height);
+    pub fn run_c(&mut self, row: u32, col: u32, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32) -> bool {
+        let cp = ControlPacket::new(row, col, camera, objects, samples, image_width, image_height);
         self.run(cp)
     }
 }
