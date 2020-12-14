@@ -16,10 +16,10 @@ use crate::objects::sphere::Sphere;
 use crate::material::Material;
 use crate::camera::Camera;
 use std::sync::Arc;
-// use std::ops::Add;
 use std::env::args;
-
 use rand::Rng;
+
+const PIXELS_UPDATE: i32 = 1000;
 
 fn random_vector() -> Vec3 {
     let mut r = rand::thread_rng();
@@ -68,7 +68,7 @@ pub fn ray_color(ray: &Ray, world: &HitList, depth: i32) -> Vec3 {
     else {
         let unit_direction = ray.direction().unit();
         let t = (unit_direction.y() + 1.0) * 0.5;
-        Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + &(Vec3::new(0.5, 0.7, 1.0) * t)
+        Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + &(Vec3::new(0.5, 0.75, 1.0) * t)
     }
 }
 
@@ -150,26 +150,31 @@ fn main() {
     let mut pool = threadpool::ThreadPool::new(num_threads);
     let mut pictwriter = bmp::BmpPicture::new(image_width, image_height, samples);
 
+    eprintln!("Scene created, spawning threads.");
     for j in 0..image_height {
         for i in 0..image_width {
             pool.run_c(j, i, camera.clone(), world.clone(), samples, image_width, image_height);
         }
     }
-
-    let mut total_sent = 0;
-    let total_reqd = image_width * image_height;
+    eprintln!("Threads spawned, working to render {}x{} image.", image_width, image_height);
+    eprintln!("Updating progress every {} pixels.", PIXELS_UPDATE);
+    let mut pixels_remaining = 0;
+    let mut pixels_written = 0;
+    let total_pixels = image_width * image_height;
     for t in pool.threads.drain(..) {
         for _ in 0..t.packets_sent {
             let d = t.data.recv().unwrap();
             pictwriter.set_pixel(d.col, d.row, &d.color);
-            
-            if total_sent % 100 == 0{
-                eprint!("\rWrote {} pixels, {} more to go.               ", total_sent, total_reqd - total_sent);
+
+            if pixels_remaining <= 0 {
+                eprint!("\r{:10}/{:<10} pixels traced.", pixels_written, total_pixels);
+                pixels_remaining = PIXELS_UPDATE;
             }
-            total_sent += 1;
+            pixels_remaining -= 1;
+            pixels_written += 1;
         }
     }
-    eprintln!();
+    eprintln!("\r{:6}/{:<6} pixels traced.", pixels_written, total_pixels);
     eprintln!("Done writing pixels, writing to BMP file.");
 
     if let Ok(_) = pictwriter.write_file(filename) {
