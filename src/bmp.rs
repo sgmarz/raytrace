@@ -1,3 +1,8 @@
+// bmp.rs
+// Bitmap scene writer
+// Stephen Marz
+// 9 Dec 2020
+
 use std::vec::Vec;
 use std::fs::File;
 use std::io::{BufWriter, Error, Write};
