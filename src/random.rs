@@ -2,7 +2,7 @@ use crate::hitable::HitList;
 use crate::material::Material;
 use crate::objects::moving_sphere::MovingSphere;
 use crate::objects::sphere::Sphere;
-use crate::texture::{CheckeredTexture, SolidColor};
+use crate::texture::{CheckeredTexture, NoiseTexture, SolidColor};
 use crate::vector::Vec3;
 use std::sync::Arc;
 
@@ -46,6 +46,20 @@ pub fn random_unit_vector() -> Vec3 {
 }
 
 pub fn random_scene() -> HitList {
+	// random_large_scene()
+	random_perlin_scene()
+}
+
+pub fn random_perlin_scene() -> HitList {
+	let mut world = HitList::new();
+	let noise = Arc::new(NoiseTexture::new());
+	world.add(Arc::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Material::new_lambertian(noise.clone()))));
+	world.add(Arc::new(Sphere::new(Vec3::new(0.0, 2.0, 0.0), 2.0, Material::new_lambertian(noise.clone()))));
+
+	world
+}
+
+pub fn random_large_scene() -> HitList {
 	let mut world = HitList::new();
 
 	let checker = Arc::new(CheckeredTexture::new_color(Vec3::new(0.2, 0.3, 0.1), Vec3::new(0.9, 0.9, 0.9)));

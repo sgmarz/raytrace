@@ -10,6 +10,7 @@ pub mod camera;
 pub mod hitable;
 pub mod material;
 pub mod objects;
+pub mod perlin;
 pub mod random;
 pub mod ray;
 pub mod texture;

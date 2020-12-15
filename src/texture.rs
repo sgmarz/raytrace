@@ -3,6 +3,7 @@
 // Stephen Marz
 // 15 Dec 2020
 
+use crate::perlin::Perlin;
 use crate::vector::{Color, Vec3};
 use std::sync::Arc;
 
@@ -74,5 +75,28 @@ impl Texture for CheckeredTexture {
 		} else {
 			self.even.value(u, v, p)
 		}
+	}
+}
+
+// Perlin noise texture
+
+pub struct NoiseTexture {
+	perlin: Perlin,
+}
+
+unsafe impl Send for NoiseTexture {}
+unsafe impl Sync for NoiseTexture {}
+
+impl NoiseTexture {
+	pub fn new() -> Self {
+		Self {
+			perlin: Perlin::new(),
+		}
+	}
+}
+
+impl Texture for NoiseTexture {
+	fn value(&self, _u: f64, _v: f64, p: &Vec3) -> Color {
+		Vec3::new(1.0, 1.0, 1.0) * self.perlin.noise(p)
 	}
 }
