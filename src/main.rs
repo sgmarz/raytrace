@@ -14,6 +14,7 @@ pub mod threadpool;
 pub mod random;
 pub mod bounding_box;
 pub mod bvh;
+pub mod texture;
 
 use crate::vector::Vec3;
 use crate::camera::Camera;

@@ -11,23 +11,27 @@ pub struct HitRecord {
     normal: Vec3,
     t: f64,
     material: Material,
-    front_face: bool
+    front_face: bool,
+    u: f64,
+    v: f64,
 }
 
 impl Default for HitRecord {
     fn default() -> Self {
-        Self::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), 0.0, false, Material::new_lambertian(Vec3::new(0.5, 0.25, 0.75)))
+        Self::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), 0.0, false, Material::new_lambertian(Vec3::new(0.5, 0.25, 0.75)), 0.0, 0.0)
     }
 }
 
 impl HitRecord {
-    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool, material: Material) -> Self {
+    pub fn new(point: Vec3, normal: Vec3, t: f64, front_face: bool, material: Material, u: f64, v: f64) -> Self {
         Self {
             point,
             normal,
             t,
             material,
             front_face,
+            u,
+            v
         }
     }
 
