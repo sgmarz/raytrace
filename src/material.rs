@@ -2,6 +2,7 @@
 use crate::ray::Ray;
 use crate::hitable::HitRecord;
 use crate::vector::{Color, Vec3};
+use crate::random::{random_unit_vector, random_in_unit_sphere};
 use std::ops::{Sub, Add, Mul, Neg};
 
 // pub trait Material {
@@ -60,14 +61,14 @@ impl Material {
     }
 
     fn scatter_lambertian(&self, rec: &HitRecord) -> Option<(Vec3, Ray)> {
-        let scatter_direction = rec.normal().add(&crate::random_unit_vector());
+        let scatter_direction = rec.normal().add(&random_unit_vector());
         let scattered = Ray::new(rec.point().clone(), scatter_direction);
         Some((self.albedo.clone(), scattered))
     }
 
     fn scatter_metal(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
         let reflected = reflect(&ray.direction().unit(), rec.normal());
-        let scattered = Ray::new(rec.point().clone(), reflected + &(crate::random_in_unit_sphere() * self.fuzz));
+        let scattered = Ray::new(rec.point().clone(), reflected + &(random_in_unit_sphere() * self.fuzz));
         let attenuation = self.albedo.clone();
         if scattered.direction().dot(rec.normal()) > 0.0 {
             Some((attenuation, scattered))

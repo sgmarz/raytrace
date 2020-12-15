@@ -4,6 +4,7 @@ use std::thread::{spawn, JoinHandle};
 use std::sync::Arc;
 use std::sync::mpsc::{Sender, Receiver, channel};
 use std::vec::Vec;
+use crate::random::random_f64;
 use crate::hitable::HitList;
 use crate::camera::Camera;
 
@@ -93,10 +94,11 @@ impl ThreadPool {
                         let ihf = packet.image_height as f64 - 1.0;
                         let mut color = Vec3::new(0.0, 0.0, 0.0);
                         for _ in 0..packet.samples {
-                            let u = (crate::random_f64() + packet.col as f64) / iwf;
-                            let v = (crate::random_f64() + packet.row as f64) / ihf;
-                            let r = packet.camera.get_ray(u, v);
-                            color += &crate::ray_color(&r, &packet.objects, 20);
+                            let u = (random_f64() + packet.col as f64) / iwf;
+                            let v = (random_f64() + packet.row as f64) / ihf;
+                            // let r = packet.camera.get_ray(u, v);
+                            // color += &crate::ray_color(&r, &packet.objects, 20);
+                            color += &packet.camera.get_ray(u, v).color(&packet.objects, 20);
                         }
                         let dp = DataPacket::new(packet.row, packet.col, color);
                         
