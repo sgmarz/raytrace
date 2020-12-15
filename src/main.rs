@@ -16,15 +16,15 @@ use crate::random::random_scene;
 use std::sync::Arc;
 use std::env::args;
 
-const PIXELS_UPDATE: i32 = 1000;
+const DEFAULT_PIXELS_UPDATE: i32 = 1000;
 
 
 fn main() {
 
     let args: Vec<String> = args().collect();
 
-    if args.len() < 6 {
-        println!("Usage: {} [filename] [width] [height] [samples] [max depth] <num threads>", args[0]);
+    if args.len() < 7 {
+        println!("Usage: {} [filename] [width] [height] [samples] [max depth] [num threads] <progress update interval>", args[0]);
         return;
     }
 
@@ -34,17 +34,18 @@ fn main() {
     let aspect_ratio = image_width as f64 / image_height as f64;
     let samples = args[4].parse::<u32>().unwrap();
     let max_depth = args[5].parse::<i32>().unwrap();
-    let mut num_threads = 1usize;
+    let num_threads = args[6].parse::<usize>().unwrap();
+    let mut pixel_update = DEFAULT_PIXELS_UPDATE;
 
-    if args.len() >= 7 {
-        num_threads = args[6].parse::<usize>().unwrap();
+    if args.len() >= 8 {
+        pixel_update = args[7].parse::<i32>().unwrap();
     }
    
     let lookfrom = Vec3::new(13.0,2.0,3.0);
     let lookat = Vec3::new(0.0,0.0,0.0);
     let vup = Vec3::new(0.0,1.0,0.0);
     let dist_to_focus = 10.0;
-    let aperture = 1.5;
+    let aperture = 0.01;
     let vfov = 20.0;
 
     let camera = Arc::new(Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus));
@@ -59,7 +60,7 @@ fn main() {
         }
     }
     eprintln!("Threads spawned, working to render {}x{} image.", image_width, image_height);
-    eprintln!("Updating progress every {} pixels.", PIXELS_UPDATE);
+    eprintln!("Updating progress every {} pixel{}.", pixel_update, if pixel_update == 1 { "" } else {"pixels"});
     let mut pixels_remaining = 0;
     let mut pixels_written = 0;
     let total_pixels = image_width * image_height;
@@ -70,7 +71,7 @@ fn main() {
 
             if pixels_remaining <= 0 {
                 eprint!("\r{:10}/{:<10} pixels traced.", pixels_written, total_pixels);
-                pixels_remaining = PIXELS_UPDATE;
+                pixels_remaining = pixel_update;
             }
             pixels_remaining -= 1;
             pixels_written += 1;
