@@ -16,11 +16,12 @@ pub struct ControlPacket {
     pub done: bool,
     pub samples: u32,
     pub image_width: u32,
-    pub image_height: u32
+    pub image_height: u32,
+    pub max_depth: i32
 }
 
 impl ControlPacket {
-    pub const fn new(row: u32, col: u32, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32) -> Self {
+    pub const fn new(row: u32, col: u32, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32, max_depth: i32) -> Self {
         Self {
             row,
             col,
@@ -30,6 +31,7 @@ impl ControlPacket {
             samples,
             image_width,
             image_height,
+            max_depth
         }
     }
     pub fn done() -> Self {
@@ -42,6 +44,7 @@ impl ControlPacket {
             samples: 0,
             image_width: 0,
             image_height: 0,
+            max_depth: 0
         }
     }
 }
@@ -98,7 +101,7 @@ impl ThreadPool {
                             let v = (random_f64() + packet.row as f64) / ihf;
                             // let r = packet.camera.get_ray(u, v);
                             // color += &crate::ray_color(&r, &packet.objects, 20);
-                            color += &packet.camera.get_ray(u, v).color(&packet.objects, 20);
+                            color += &packet.camera.get_ray(u, v).color(&packet.objects, 10);
                         }
                         let dp = DataPacket::new(packet.row, packet.col, color);
                         
@@ -126,8 +129,9 @@ impl ThreadPool {
         }
         res.is_ok()
     }
-    pub fn run_c(&mut self, row: u32, col: u32, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32) -> bool {
-        let cp = ControlPacket::new(row, col, camera, objects, samples, image_width, image_height);
+    
+    pub fn run_c(&mut self, row: u32, col: u32, camera: Arc<Camera>, objects: Arc<HitList>, samples: u32, image_width: u32, image_height: u32, max_depth: i32) -> bool {
+        let cp = ControlPacket::new(row, col, camera, objects, samples, image_width, image_height, max_depth);
         self.run(cp)
     }
 }

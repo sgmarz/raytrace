@@ -87,7 +87,7 @@ impl Material {
 }
 
 fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
-    return v.sub(&(n.clone() * v.dot(n) * 2.0));
+    return v.sub(&(n.mul(v.dot(n) * 2.0)));
 }
 
 fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3{

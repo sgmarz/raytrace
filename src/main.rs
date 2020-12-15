@@ -23,30 +23,31 @@ fn main() {
 
     let args: Vec<String> = args().collect();
 
-    if args.len() < 5 {
-        println!("Usage: {} [filename] [width] [ratio] [samples] <num threads>", args[0]);
+    if args.len() < 6 {
+        println!("Usage: {} [filename] [width] [height] [samples] [max depth] <num threads>", args[0]);
         return;
     }
 
     let filename = &args[1];
     let image_width = args[2].parse::<u32>().unwrap();
-    let aspect_ratio = args[3].parse::<f64>().unwrap();
+    let image_height = args[3].parse::<u32>().unwrap();
+    let aspect_ratio = image_width as f64 / image_height as f64;
     let samples = args[4].parse::<u32>().unwrap();
+    let max_depth = args[5].parse::<i32>().unwrap();
     let mut num_threads = 1usize;
 
-    if args.len() >= 6 {
-        num_threads = args[5].parse::<usize>().unwrap();
+    if args.len() >= 7 {
+        num_threads = args[6].parse::<usize>().unwrap();
     }
-
-    let image_height = (image_width as f64 / aspect_ratio) as u32;
-    
+   
     let lookfrom = Vec3::new(13.0,2.0,3.0);
     let lookat = Vec3::new(0.0,0.0,0.0);
     let vup = Vec3::new(0.0,1.0,0.0);
     let dist_to_focus = 10.0;
-    let aperture = 0.1;
+    let aperture = 1.5;
+    let vfov = 20.0;
 
-    let camera = Arc::new(Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus));
+    let camera = Arc::new(Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus));
     let world = Arc::new(random_scene());
     let mut pool = threadpool::ThreadPool::new(num_threads);
     let mut pictwriter = bmp::BmpPicture::new(image_width, image_height, samples);
@@ -54,7 +55,7 @@ fn main() {
     eprintln!("Scene created, spawning threads.");
     for j in 0..image_height {
         for i in 0..image_width {
-            pool.run_c(j, i, camera.clone(), world.clone(), samples, image_width, image_height);
+            pool.run_c(j, i, camera.clone(), world.clone(), samples, image_width, image_height, max_depth);
         }
     }
     eprintln!("Threads spawned, working to render {}x{} image.", image_width, image_height);
