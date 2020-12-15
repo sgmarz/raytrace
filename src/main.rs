@@ -60,7 +60,7 @@ fn main() {
         }
     }
     eprintln!("Threads spawned, working to render {}x{} image.", image_width, image_height);
-    eprintln!("Updating progress every {} pixel{}.", pixel_update, if pixel_update == 1 { "" } else {"pixels"});
+    eprintln!("Updating progress every {} pixel{}.", pixel_update, if pixel_update == 1 { "" } else {"s"});
     let mut pixels_remaining = 0;
     let mut pixels_written = 0;
     let total_pixels = image_width * image_height;
