@@ -5,10 +5,6 @@ use crate::vector::{Color, Vec3};
 use crate::random::{random_unit_vector, random_in_unit_sphere};
 use std::ops::{Sub, Add, Mul, Neg};
 
-// pub trait Material {
-//     fn scatter(&self, ray: &Ray, record: &HitRecord) -> Option<(Vec3, Ray)>;
-// }
-
 #[derive(Copy, Clone)]
 pub enum MaterialType {
     Lambertian,
