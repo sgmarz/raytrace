@@ -26,6 +26,11 @@ pub fn random_double(min: f64, max: f64) -> f64 {
     r.gen_range(min, max)
 }
 
+pub fn random_int(min: i32, max: i32) -> i32 {
+    let mut r = rand::thread_rng();
+    r.gen_range(min, max)
+}
+
 pub fn random_in_unit_sphere() -> Vec3 {
     loop {
         let p = random_vector();

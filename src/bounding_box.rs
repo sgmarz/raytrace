@@ -6,7 +6,7 @@
 use crate::vector::Vec3;
 use crate::ray::Ray;
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct AxisAlignedBoundingBox {
     minimum: Vec3,
     maximum: Vec3,
@@ -28,7 +28,7 @@ impl AxisAlignedBoundingBox {
         &self.maximum
     }
 
-    pub fn hit(&mut self, ray: &Ray, t_min: f64, t_max: f64) -> bool {
+    pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> bool {
         let mut t_min_so_far = t_min;
         let mut t_max_so_far = t_max;
         for a in 0..3 {

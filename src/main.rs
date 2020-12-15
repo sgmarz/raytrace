@@ -13,6 +13,7 @@ pub mod camera;
 pub mod threadpool;
 pub mod random;
 pub mod bounding_box;
+pub mod bvh;
 
 use crate::vector::Vec3;
 use crate::camera::Camera;

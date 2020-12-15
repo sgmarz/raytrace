@@ -73,6 +73,18 @@ impl HitList {
         self.objects.push(obj);
     }
 
+    pub fn objects(&self) -> &Vec<Arc<dyn Hitable + Send + Sync>> {
+        &self.objects
+    }
+
+    pub fn objects_mut(&mut self) -> &mut Vec<Arc<dyn Hitable + Send + Sync>> {
+        &mut self.objects
+    }
+
+    pub fn len(&self) -> usize {
+        self.objects.len()
+    }
+
     pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut closest_rec = HitRecord::default();
         let mut hit_anything = false;
@@ -93,6 +105,7 @@ impl HitList {
             None
         }
     }
+
     pub fn bounding_box(&self, time0: f64, time1: f64) -> Option<AxisAlignedBoundingBox> {
         if self.objects.len() == 0 {
             return None;
