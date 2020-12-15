@@ -50,21 +50,21 @@ impl Material {
 
     pub fn scatter(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
         match self.material_type {
-            MaterialType::Lambertian => self.scatter_lambertian(rec),
+            MaterialType::Lambertian => self.scatter_lambertian(ray, rec),
             MaterialType::Metal => self.scatter_metal(ray, rec),
             MaterialType::DiElectric => self.scatter_dielectric(ray, rec)
         }
     }
 
-    fn scatter_lambertian(&self, rec: &HitRecord) -> Option<(Vec3, Ray)> {
+    fn scatter_lambertian(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
         let scatter_direction = rec.normal().add(&random_unit_vector());
-        let scattered = Ray::new(rec.point().clone(), scatter_direction);
+        let scattered = Ray::new(rec.point().clone(), scatter_direction, ray.time());
         Some((self.albedo.clone(), scattered))
     }
 
     fn scatter_metal(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
         let reflected = reflect(&ray.direction().unit(), rec.normal());
-        let scattered = Ray::new(rec.point().clone(), reflected + &(random_in_unit_sphere() * self.fuzz));
+        let scattered = Ray::new(rec.point().clone(), reflected + &(random_in_unit_sphere() * self.fuzz), ray.time());
         let attenuation = self.albedo.clone();
         if scattered.direction().dot(rec.normal()) > 0.0 {
             Some((attenuation, scattered))
@@ -81,7 +81,7 @@ impl Material {
         let unit_direction = ray.direction().unit();
         let refracted = refract(&unit_direction, rec.normal(), refraction_ratio);
 
-        let scattered = Ray::new(rec.point().clone(), refracted);
+        let scattered = Ray::new(rec.point().clone(), refracted, ray.time());
         Some((attenuation, scattered))
     }
 }

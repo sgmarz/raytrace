@@ -3,6 +3,7 @@ use crate::vector::Vec3;
 use crate::hitable::HitList;
 use crate::material::Material;
 use crate::objects::sphere::Sphere;
+use crate::objects::moving_sphere::MovingSphere;
 use std::sync::Arc;
 
 use rand::Rng;
@@ -55,7 +56,8 @@ pub fn random_scene() -> HitList {
                     // diffuse
                     let albedo = Vec3::new(random_f64(), random_f64(), random_f64()) * &Vec3::new(random_f64(), random_f64(), random_f64());
                     let sphere_material = Material::new_lambertian(albedo);
-                    world.add(Arc::new(Sphere::new(center.clone(), 0.2, sphere_material)));
+                    let center2 = center + &Vec3::new(0.0, random_double(0.0, 0.5), 0.0);
+                    world.add(Arc::new(MovingSphere::new(center, center2, 0.0, 1.0, 0.2, sphere_material)));
                 } 
                 else if choose_mat < 0.95 {
                     // metal

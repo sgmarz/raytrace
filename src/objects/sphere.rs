@@ -2,8 +2,9 @@
 use crate::hitable::{Hitable, HitRecord};
 use crate::vector::Vec3;
 use crate::ray::Ray;
-use std::ops::Sub;
+use std::ops::{Add, Sub};
 use crate::material::Material;
+use crate::bounding_box::AxisAlignedBoundingBox;
 
 
 pub struct Sphere {
@@ -68,5 +69,11 @@ impl Hitable for Sphere {
         let normal = if front_face { outward_normal } else { -outward_normal };
 
         Some(HitRecord::new(point, normal, t, front_face, self.material.clone()))
+    }
+    fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<AxisAlignedBoundingBox> {
+        let output_box = AxisAlignedBoundingBox::new(
+        self.center().sub(&Vec3::new(self.radius, self.radius, self.radius)),
+        self.center().add(&Vec3::new(self.radius, self.radius, self.radius)));
+        Some(output_box)
     }
 }

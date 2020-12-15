@@ -1,10 +1,10 @@
 
 use crate::vector::Vec3;
 use crate::ray::Ray;
-// use std::rc::Rc;
 use std::sync::Arc;
 use std::vec::Vec;
 use crate::material::Material;
+use crate::bounding_box::AxisAlignedBoundingBox;
 
 pub struct HitRecord {
     point: Vec3,
@@ -54,6 +54,7 @@ impl HitRecord {
 
 pub trait Hitable {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<AxisAlignedBoundingBox>;
 }
 
 #[derive(Default)]
@@ -91,6 +92,29 @@ impl HitList {
         else {
             None
         }
+    }
+    pub fn bounding_box(&self, time0: f64, time1: f64) -> Option<AxisAlignedBoundingBox> {
+        if self.objects.len() == 0 {
+            return None;
+        }
+
+        let mut first_box = true;
+        let mut output_box = AxisAlignedBoundingBox::default();
+        for object in self.objects.iter() {
+            if let Some(aabb) = object.bounding_box(time0, time1) {
+                output_box = if first_box {
+                    aabb
+                }
+                else {
+                    output_box.surrounding_box(&aabb)
+                };
+                first_box = false;
+            }
+            else {
+                return None;
+            }
+        }
+        Some(output_box)
     }
 }
 

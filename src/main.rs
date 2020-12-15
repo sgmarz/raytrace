@@ -12,6 +12,7 @@ pub mod material;
 pub mod camera;
 pub mod threadpool;
 pub mod random;
+pub mod bounding_box;
 
 use crate::vector::Vec3;
 use crate::camera::Camera;
@@ -49,9 +50,11 @@ fn main() {
     let dist_to_focus = 10.0;
     let aperture = 0.01;
     let vfov = 20.0;
+    let time0 = 0.0;
+    let time1 = 1.0;
 
     // Create the camera, world, thread pool, and picture writer (to BMP for now)
-    let camera = Arc::new(Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus));
+    let camera = Arc::new(Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, time0, time1));
     let world = Arc::new(random_scene());
     let mut pool = threadpool::ThreadPool::new(num_threads);
     let mut pictwriter = bmp::BmpPicture::new(image_width, image_height, samples);
