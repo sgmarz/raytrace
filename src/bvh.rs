@@ -5,6 +5,7 @@
 
 use crate::hitable::{Hitable, HitList, HitRecord};
 use crate::bounding_box::AxisAlignedBoundingBox;
+use crate::vector::Vec3;
 use crate::ray::Ray;
 use crate::random::random_int;
 use std::sync::Arc;

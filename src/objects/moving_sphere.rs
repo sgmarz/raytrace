@@ -30,8 +30,19 @@ impl MovingSphere {
             material
         }
     }
+
     pub fn center(&self, time: f64) -> Vec3 {
         self.center0 + &((self.center1 - &self.center0) * ((time - self.time0) / (self.time1 - self.time0)))
+    }
+
+    fn get_uv(&self, point: &Vec3) -> (f64, f64) {
+        let pi = std::f64::consts::PI;
+        let theta = -&point.y().acos();
+        let phi = -&point.z().atan2(point.x()) + pi;
+
+        let u = phi / (2.0 * pi);
+        let v = theta / pi;
+        (u, v)
     }
 }
 
@@ -63,7 +74,8 @@ impl Hitable for MovingSphere {
         let outward_normal = (point - &self.center(ray.time())) / self.radius;
         let front_face = ray.direction().dot(&outward_normal) < 0.0;
         let material = self.material.clone();
-        let rec = HitRecord::new(point, outward_normal, t, front_face, material);
+        let (u, v) = self.get_uv(&outward_normal);
+        let rec = HitRecord::new(point, outward_normal, t, front_face, material, u, v);
 
         Some(rec)
     }

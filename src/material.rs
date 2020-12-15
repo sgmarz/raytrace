@@ -2,6 +2,7 @@
 use crate::ray::Ray;
 use crate::hitable::HitRecord;
 use crate::vector::{Color, Vec3};
+use crate::texture::Texture;
 use crate::random::{random_unit_vector, random_in_unit_sphere};
 use std::ops::{Sub, Add, Mul, Neg};
 

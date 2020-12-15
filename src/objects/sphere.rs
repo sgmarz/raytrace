@@ -39,6 +39,16 @@ impl Sphere {
         self.radius
     }
 
+    fn get_uv(&self, point: &Vec3) -> (f64, f64) {
+        let pi = std::f64::consts::PI;
+        let theta = -&point.y().acos();
+        let phi = -&point.z().atan2(point.x()) + pi;
+
+        let u = phi / (2.0 * pi);
+        let v = theta / pi;
+        (u, v)
+    }
+
 }
 
 impl Hitable for Sphere {
@@ -67,13 +77,15 @@ impl Hitable for Sphere {
         let outward_normal = (point - self.center()) / self.radius;
         let front_face = ray.direction().dot(&outward_normal) < 0.0;
         let normal = if front_face { outward_normal } else { -outward_normal };
-
-        Some(HitRecord::new(point, normal, t, front_face, self.material.clone()))
+        let (u, v) = self.get_uv(&outward_normal);
+        Some(HitRecord::new(point, normal, t, front_face, self.material.clone(), u, v))
     }
+
     fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<AxisAlignedBoundingBox> {
         let output_box = AxisAlignedBoundingBox::new(
         self.center().sub(&Vec3::new(self.radius, self.radius, self.radius)),
         self.center().add(&Vec3::new(self.radius, self.radius, self.radius)));
         Some(output_box)
     }
+
 }
