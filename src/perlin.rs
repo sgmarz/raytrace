@@ -34,7 +34,7 @@ impl Perlin {
 		let j = (4.0 * point.y()) as usize & (POINT_COUNT - 1);
 		let k = (4.0 * point.z()) as usize & (POINT_COUNT - 1);
 
-		return self.ranfloat[self.perm[0][i] ^ self.perm[1][j] ^ self.perm[2][k]];
+		self.ranfloat[self.perm[0][i] ^ self.perm[1][j] ^ self.perm[2][k]]
 	}
 
 	fn perlin_generate_perm() -> Vec<usize> {
