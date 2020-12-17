@@ -4,9 +4,10 @@ use crate::material::Material;
 use crate::ray::Ray;
 use crate::texture::SolidColor;
 use crate::vector::Vec3;
-use std::ops::{Add, Sub};
+use std::ops::{Add, Neg, Sub};
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub struct Sphere {
 	center: Vec3,
 	radius: f64,
@@ -35,14 +36,22 @@ impl Sphere {
 		&self.center
 	}
 
+	pub fn center_mut(&mut self) -> &mut Vec3 {
+		&mut self.center
+	}
+
 	pub fn radius(&self) -> f64 {
 		self.radius
 	}
 
+	pub fn radius_mut(&mut self) -> &f64 {
+		&mut self.radius
+	}
+
 	fn get_uv(&self, point: &Vec3) -> (f64, f64) {
 		let pi = std::f64::consts::PI;
-		let theta = -&point.y().acos();
-		let phi = -&point.z().atan2(point.x()) + pi;
+		let theta = point.y().neg().acos();
+		let phi = point.z().neg().atan2(point.x()) + pi;
 
 		let u = phi / (2.0 * pi);
 		let v = theta / pi;
@@ -80,7 +89,7 @@ impl Hitable for Sphere {
 		} else {
 			-outward_normal
 		};
-		let (u, v) = self.get_uv(&outward_normal);
+		let (u, v) = self.get_uv(&normal);
 		Some(HitRecord::new(point, normal, t, front_face, self.material.clone(), u, v))
 	}
 
@@ -90,5 +99,11 @@ impl Hitable for Sphere {
 			self.center().add(&Vec3::new(self.radius, self.radius, self.radius)),
 		);
 		Some(output_box)
+	}
+
+	fn translate(&mut self, x: f64, y: f64, z: f64) {
+		self.center[0] += x;
+		self.center[1] += y;
+		self.center[2] += z;
 	}
 }

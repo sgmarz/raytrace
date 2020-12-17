@@ -46,8 +46,8 @@ pub fn random_unit_vector() -> Vec3 {
 }
 
 pub fn random_scene() -> HitList {
-	// random_large_scene()
-	random_perlin_scene()
+	random_large_scene()
+	// random_perlin_scene()
 }
 
 pub fn random_perlin_scene() -> HitList {

@@ -67,9 +67,10 @@ impl HitRecord {
 pub trait Hitable {
 	fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 	fn bounding_box(&self, time0: f64, time1: f64) -> Option<AxisAlignedBoundingBox>;
+	fn translate(&mut self, x: f64, y: f64, z: f64);
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct HitList {
 	objects: Vec<Arc<dyn Hitable + Send + Sync>>,
 }

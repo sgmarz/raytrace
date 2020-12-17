@@ -3,30 +3,34 @@
 // Stephen Marz
 // 15 Dec 2020
 
-use crate::{bounding_box::AxisAlignedBoundingBox,
-            hitable::{HitRecord, Hitable},
-            material::Material,
-            ray::Ray,
-            vector::Vec3};
+use crate::{
+	bounding_box::AxisAlignedBoundingBox,
+	hitable::{HitRecord, Hitable},
+	material::Material,
+	ray::Ray,
+	vector::Vec3,
+};
 use std::ops::{Add, Sub};
 
 pub struct MovingSphere {
-	center0:  Vec3,
-	center1:  Vec3,
-	time0:    f64,
-	time1:    f64,
-	radius:   f64,
-	material: Material
+	center0: Vec3,
+	center1: Vec3,
+	time0: f64,
+	time1: f64,
+	radius: f64,
+	material: Material,
 }
 
 impl MovingSphere {
 	pub fn new(center0: Vec3, center1: Vec3, time0: f64, time1: f64, radius: f64, material: Material) -> Self {
-		Self { center0,
-		       center1,
-		       time0,
-		       time1,
-		       radius,
-		       material }
+		Self {
+			center0,
+			center1,
+			time0,
+			time1,
+			radius,
+			material,
+		}
 	}
 
 	pub fn center(&self, time: f64) -> Vec3 {
@@ -79,13 +83,22 @@ impl Hitable for MovingSphere {
 
 	fn bounding_box(&self, time0: f64, time1: f64) -> Option<AxisAlignedBoundingBox> {
 		let box0 = AxisAlignedBoundingBox::new(
-		                                       self.center(time0).sub(&Vec3::new(self.radius, self.radius, self.radius)),
-		                                       self.center(time0).add(&Vec3::new(self.radius, self.radius, self.radius))
+			self.center(time0).sub(&Vec3::new(self.radius, self.radius, self.radius)),
+			self.center(time0).add(&Vec3::new(self.radius, self.radius, self.radius)),
 		);
 		let box1 = AxisAlignedBoundingBox::new(
-		                                       self.center(time1).sub(&Vec3::new(self.radius, self.radius, self.radius)),
-		                                       self.center(time1).add(&Vec3::new(self.radius, self.radius, self.radius))
+			self.center(time1).sub(&Vec3::new(self.radius, self.radius, self.radius)),
+			self.center(time1).add(&Vec3::new(self.radius, self.radius, self.radius)),
 		);
 		Some(box0.surrounding_box(&box1))
+	}
+
+	fn translate(&mut self, x: f64, y: f64, z: f64) {
+		self.center0[0] += x;
+		self.center0[1] += y;
+		self.center0[2] += z;
+		self.center1[0] += x;
+		self.center1[1] += y;
+		self.center1[2] += z;
 	}
 }

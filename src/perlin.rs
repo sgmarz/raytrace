@@ -14,6 +14,12 @@ pub struct Perlin {
 	perm: [Vec<usize>; 3],
 }
 
+impl Default for Perlin {
+	fn default() -> Self {
+		Self::new()
+	}
+}
+
 impl Perlin {
 	pub fn new() -> Self {
 		let mut ranfloat = Vec::with_capacity(POINT_COUNT);
@@ -29,12 +35,29 @@ impl Perlin {
 		}
 	}
 
-	pub fn noise(&self, point: &Vec3) -> f64 {
-		let i = (4.0 * point.x()) as usize & (POINT_COUNT - 1);
-		let j = (4.0 * point.y()) as usize & (POINT_COUNT - 1);
-		let k = (4.0 * point.z()) as usize & (POINT_COUNT - 1);
+	pub fn noise(&self, p: &Vec3) -> f64 {
+		let u = p.x() - p.x().floor();
+		let v = p.y() - p.y().floor();
+		let w = p.z() - p.z().floor();
 
-		self.ranfloat[self.perm[0][i] ^ self.perm[1][j] ^ self.perm[2][k]]
+		let u = u * u * (3.0 - 2.0 * u);
+		let v = v * v * (3.0 - 2.0 * v);
+		let w = w * w * (3.0 - 2.0 * w);
+
+		let i = p.x().floor() as usize;
+		let j = p.y().floor() as usize;
+		let k = p.z().floor() as usize;
+		let mut c = [[[0.0; 2]; 2]; 2];
+
+		for di in 0..2 {
+			for dj in 0..2 {
+				for dk in 0..2 {
+					c[di][dj][dk] = self.ranfloat[self.perm[0][(i + di) & 255] ^ self.perm[1][(j + dj) & 255] ^ self.perm[2][(k + dk) & 255]];
+				}
+			}
+		}
+
+		Self::trilinear_interpolation(c, u, v, w)
 	}
 
 	fn perlin_generate_perm() -> Vec<usize> {
@@ -49,11 +72,26 @@ impl Perlin {
 	}
 
 	fn permute(p: &mut Vec<usize>, n: usize) {
-		for i in (1..n).rev() {
+		for i in 1..n {
 			let target = random_int(0, i as i32) as usize;
 			let tmp = p[i];
 			p[i] = p[target];
 			p[target] = tmp;
 		}
+	}
+
+	fn trilinear_interpolation(perm: [[[f64; 2]; 2]; 2], u: f64, v: f64, w: f64) -> f64 {
+		let mut accum = 0.0;
+		for i in 0usize..2 {
+			for j in 0usize..2 {
+				for k in 0usize..2 {
+					let a = i as f64;
+					let b = j as f64;
+					let c = k as f64;
+					accum += (a * u + (1.0 - a) * (1.0 - u)) * (b * v + (1.0 - b) * (1.0 - v)) * (c * w + (1.0 - c) * (1.0 - w)) * perm[i][j][k];
+				}
+			}
+		}
+		accum
 	}
 }

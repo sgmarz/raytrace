@@ -104,6 +104,7 @@ impl Hitable for BvhNode {
 			}
 		}
 	}
+	fn translate(&mut self, _x: f64, _y: f64, _z: f64) {}
 }
 
 fn box_compare(a: Arc<dyn Hitable>, b: Arc<dyn Hitable>, axis: usize) -> bool {
