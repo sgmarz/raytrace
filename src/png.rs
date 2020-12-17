@@ -61,7 +61,7 @@ impl PngPicture {
 
 		let scale = 1.0 / self.samples as f64;
 
-		let mut encoder = png::Encoder::new(wd, self.width, self.height); // Width is 2 pixels and height is 1.
+		let mut encoder = png::Encoder::new(wd, self.width, self.height);
 		encoder.set_color(png::ColorType::RGB);
 		encoder.set_depth(png::BitDepth::Eight);
 		let writer = encoder.write_header().unwrap();
