@@ -105,17 +105,15 @@ impl Texture for NoiseTexture {
 pub struct ImageTexture {
 	data: Vec<(f64, f64, f64)>,
 	width: usize,
-	height: usize,
-	bytes_per_scanline: usize,
+	height: usize
 }
 
 impl ImageTexture {
-	pub fn new(data: Vec<(f64, f64, f64)>, width: usize, height: usize, bytes_per_scanline: usize) -> Self {
+	pub fn new(data: Vec<(f64, f64, f64)>, width: usize, height: usize) -> Self {
 		Self {
 			data,
 			width,
-			height,
-			bytes_per_scanline,
+			height
 		}
 	}
 
@@ -127,8 +125,6 @@ impl ImageTexture {
 		let (info, mut reader) = decoder.read_info().unwrap();
 		let width = info.width as usize;
 		let height = info.height as usize;
-		// println!("Width {}, Height {}, total = {}", width, height, width * height);
-		let bytes_per_scanline = width;
 		// Allocate the output buffer.
 		let mut buf = vec![0; info.buffer_size()];
 		let mut data = Vec::<(f64, f64, f64)>::with_capacity(info.buffer_size() / 3);
@@ -147,7 +143,6 @@ impl ImageTexture {
 			data,
 			width,
 			height,
-			bytes_per_scanline,
 		}
 	}
 }
@@ -172,8 +167,6 @@ impl Texture for ImageTexture {
 		if j >= self.height {
 			j = self.height - 1;
 		}
-
-		// println!("i = {}, j = {}", i, j);
 		let pixel = self.data[j * self.width + i];
 
 		Color::new(pixel.0, pixel.1, pixel.2)
@@ -183,9 +176,11 @@ impl Texture for ImageTexture {
 fn clamp(val: f64, min: f64, max: f64) -> f64 {
 	if val < min {
 		min
-	} else if val > max {
+	} 
+	else if val > max {
 		max
-	} else {
+	} 
+	else {
 		val
 	}
 }

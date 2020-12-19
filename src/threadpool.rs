@@ -80,6 +80,7 @@ impl ThreadPool {
 	pub fn new(num_threads: usize) -> Self {
 		assert!(num_threads > 0);
 		let mut threads = Vec::with_capacity(num_threads);
+		let background = Vec3::new(0.0, 0.0, 0.0);
 		for _ in 0..num_threads {
 			let (data_s, data_r): (Sender<DataPacket>, Receiver<_>) = channel();
 			let (control_s, control_r): (Sender<ControlPacket>, Receiver<_>) = channel();
@@ -96,7 +97,7 @@ impl ThreadPool {
 						for _ in 0..packet.samples {
 							let u = (random_f64() + packet.col as f64) / iwf;
 							let v = (random_f64() + packet.row as f64) / ihf;
-							color += &packet.camera.get_ray(u, v).color(&packet.objects, 10);
+							color += &packet.camera.get_ray(u, v).color(&background, &packet.objects, 10);
 						}
 						let dp = DataPacket::new(packet.row, packet.col, color);
 

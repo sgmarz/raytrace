@@ -24,6 +24,7 @@ use crate::objects::sphere::Sphere;
 use crate::random::random_double;
 use crate::texture::CheckeredTexture;
 use crate::texture::SolidColor;
+use crate::objects::xyrect::XyRect;
 use crate::texture::ImageTexture;
 use crate::threadpool::ThreadPool;
 use crate::{camera::Camera, vector::Vec3};
@@ -68,7 +69,7 @@ fn main() {
 
 	let mut spheres = Vec::<Sphere>::with_capacity(25);
 	let checker = Arc::new(CheckeredTexture::new_color(Vec3::new(0.2, 0.3, 0.1), Vec3::new(0.9, 0.9, 0.9)));
-	// spheres.push(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Material::new_lambertian(checker)));
+	spheres.push(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Material::new_lambertian(checker)));
 
 	for _ in 0..1 {
 		// let solid = Arc::new(SolidColor::from_rgb(random_double(0.0, 1.0), random_double(0.0, 1.0), random_double(0.0, 1.0)));
@@ -81,6 +82,8 @@ fn main() {
 		let sphere = Sphere::new(center, radius, material);
 		spheres.push(sphere)
 	}
+
+
 
 	// Create the camera, world, thread pool, and picture writer (to BMP for now)
 	let camera = Arc::new(Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, time0, time1));
@@ -108,6 +111,11 @@ fn main() {
 
 fn make_world(spheres: &Vec<Sphere>) -> Arc<HitList> {
 	let mut world = HitList::new();
+
+	let solid_white = SolidColor::from_rgb(4.0, 4.0, 4.0);
+	let light_mat = Material::new_diffuse_light(Arc::new(solid_white));
+	let rect = XyRect::new(3.0, 5.0, 1.0, 3.0, -2.0, light_mat);
+	world.add(Arc::new(rect));
 
 	for sphere in spheres.iter() {
 		world.add(Arc::new(sphere.clone()));

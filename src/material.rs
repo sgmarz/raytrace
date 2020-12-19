@@ -16,7 +16,7 @@ pub enum MaterialType {
 	Lambertian,
 	Metal,
 	DiElectric,
-	DiffuseLight
+	DiffuseLight,
 }
 
 #[derive(Clone)]
@@ -59,13 +59,35 @@ impl Material {
 		}
 	}
 
+	pub fn new_diffuse_light(emit: Arc<dyn Texture + Send + Sync>) -> Self {
+		Self {
+			material_type: MaterialType::DiffuseLight,
+			albedo: emit,
+			fuzz: 0.0,
+			ir: 0.0,
+		}
+	}
+
 	pub fn scatter(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
 		match self.material_type {
 			MaterialType::Lambertian => self.scatter_lambertian(ray, rec),
 			MaterialType::Metal => self.scatter_metal(ray, rec),
 			MaterialType::DiElectric => self.scatter_dielectric(ray, rec),
-			MaterialType::DiffuseLight => None
+			MaterialType::DiffuseLight => None,
 		}
+	}
+
+	pub fn emitted(&self, u: f64, v: f64, point: &Vec3) -> Color {
+		match self.material_type {
+			MaterialType::Lambertian => Color::new(0.0, 0.0, 0.0),
+			MaterialType::Metal => Color::new(0.0, 0.0, 0.0),
+			MaterialType::DiElectric => Color::new(0.0, 0.0, 0.0),
+			MaterialType::DiffuseLight => self.emit_diffused(u, v, point),
+		}
+	}
+
+	fn emit_diffused(&self, u: f64, v: f64, point: &Vec3) -> Color {
+		self.albedo.value(u, v, point)
 	}
 
 	fn scatter_lambertian(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
