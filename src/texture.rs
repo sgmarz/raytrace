@@ -173,11 +173,10 @@ impl Texture for ImageTexture {
 			j = self.height - 1;
 		}
 
-		let color_scale = 1.0;
 		// println!("i = {}, j = {}", i, j);
 		let pixel = self.data[j * self.width + i];
 
-		Color::new(color_scale * pixel.0, color_scale * pixel.1, color_scale * pixel.2)
+		Color::new(pixel.0, pixel.1, pixel.2)
 	}
 }
 

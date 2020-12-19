@@ -68,7 +68,7 @@ fn main() {
 
 	let mut spheres = Vec::<Sphere>::with_capacity(25);
 	let checker = Arc::new(CheckeredTexture::new_color(Vec3::new(0.2, 0.3, 0.1), Vec3::new(0.9, 0.9, 0.9)));
-	spheres.push(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Material::new_lambertian(checker)));
+	// spheres.push(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Material::new_lambertian(checker)));
 
 	for _ in 0..1 {
 		// let solid = Arc::new(SolidColor::from_rgb(random_double(0.0, 1.0), random_double(0.0, 1.0), random_double(0.0, 1.0)));

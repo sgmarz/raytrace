@@ -16,6 +16,7 @@ pub enum MaterialType {
 	Lambertian,
 	Metal,
 	DiElectric,
+	DiffuseLight
 }
 
 #[derive(Clone)]
@@ -63,6 +64,7 @@ impl Material {
 			MaterialType::Lambertian => self.scatter_lambertian(ray, rec),
 			MaterialType::Metal => self.scatter_metal(ray, rec),
 			MaterialType::DiElectric => self.scatter_dielectric(ray, rec),
+			MaterialType::DiffuseLight => None
 		}
 	}
 
