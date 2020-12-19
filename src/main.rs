@@ -24,6 +24,7 @@ use crate::objects::sphere::Sphere;
 use crate::random::random_double;
 use crate::texture::CheckeredTexture;
 use crate::texture::SolidColor;
+use crate::texture::ImageTexture;
 use crate::threadpool::ThreadPool;
 use crate::{camera::Camera, vector::Vec3};
 use std::{env::args, sync::Arc};
@@ -69,11 +70,14 @@ fn main() {
 	let checker = Arc::new(CheckeredTexture::new_color(Vec3::new(0.2, 0.3, 0.1), Vec3::new(0.9, 0.9, 0.9)));
 	spheres.push(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Material::new_lambertian(checker)));
 
-	for _ in 0..15 {
-		let solid = Arc::new(SolidColor::from_rgb(random_double(0.0, 1.0), random_double(0.0, 1.0), random_double(0.0, 1.0)));
-		let material = Material::new_metal(solid, random_double(0.0, 0.3));
-		let center = Vec3::new(random_double(-0.5, 1.5), random_double(0.2, 2.0), random_double(-2.0, 2.0));
-		let radius = random_double(0.07, 0.7);
+	for _ in 0..1 {
+		// let solid = Arc::new(SolidColor::from_rgb(random_double(0.0, 1.0), random_double(0.0, 1.0), random_double(0.0, 1.0)));
+		let texture = Arc::new(ImageTexture::from_file("d.png"));
+		let material = Material::new_lambertian(texture);
+		// let center = Vec3::new(random_double(-0.5, 1.5), random_double(0.2, 2.0), random_double(-2.0, 2.0));
+		// let radius = random_double(0.07, 0.7);
+		let center = Vec3::new(0.0, 0.0, 0.0);
+		let radius = 2.0;
 		let sphere = Sphere::new(center, radius, material);
 		spheres.push(sphere)
 	}
