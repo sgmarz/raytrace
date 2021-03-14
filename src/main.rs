@@ -21,11 +21,11 @@ pub mod vector;
 use crate::hitable::HitList;
 use crate::material::Material;
 use crate::objects::sphere::Sphere;
+use crate::objects::xyrect::XyRect;
 use crate::random::random_double;
 use crate::texture::CheckeredTexture;
-use crate::texture::SolidColor;
-use crate::objects::xyrect::XyRect;
 use crate::texture::ImageTexture;
+use crate::texture::SolidColor;
 use crate::threadpool::ThreadPool;
 use crate::{camera::Camera, vector::Vec3};
 use std::{env::args, sync::Arc};
@@ -82,8 +82,6 @@ fn main() {
 		let sphere = Sphere::new(center, radius, material);
 		spheres.push(sphere)
 	}
-
-
 
 	// Create the camera, world, thread pool, and picture writer (to BMP for now)
 	let camera = Arc::new(Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, time0, time1));
