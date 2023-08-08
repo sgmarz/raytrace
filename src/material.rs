@@ -104,7 +104,7 @@ impl Material {
 
 	fn scatter_metal(&self, ray: &Ray, rec: &HitRecord) -> Option<(Vec3, Ray)> {
 		let reflected = reflect(&ray.direction().unit(), rec.normal());
-		let scattered = Ray::new(rec.point().clone(), reflected + &(random_in_unit_sphere() * self.fuzz), ray.time());
+		let scattered = Ray::new(*rec.point(), reflected + &(random_in_unit_sphere() * self.fuzz), ray.time());
 		let attenuation = self.albedo.clone();
 		if scattered.direction().dot(rec.normal()) > 0.0 {
 			Some((attenuation.value(rec.u(), rec.v(), rec.point()), scattered))
@@ -124,13 +124,13 @@ impl Material {
 		let unit_direction = ray.direction().unit();
 		let refracted = refract(&unit_direction, rec.normal(), refraction_ratio);
 
-		let scattered = Ray::new(rec.point().clone(), refracted, ray.time());
+		let scattered = Ray::new(*rec.point(), refracted, ray.time());
 		Some((attenuation, scattered))
 	}
 }
 
 fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
-	return v.sub(&(n.mul(v.dot(n) * 2.0)));
+	v.sub(&(n.mul(v.dot(n) * 2.0)))
 }
 
 fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {

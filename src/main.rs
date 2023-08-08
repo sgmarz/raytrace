@@ -95,7 +95,7 @@ fn main() {
 
 		run(camera.clone(), make_world(&spheres), &mut pool, samples, image_width, image_height, max_depth, pixel_update, frame_filename.as_str());
 		for i in 1..spheres.len() {
-			let ref mut sphere = spheres[i];
+			let sphere = &mut spheres[i];
 			let x = random_double(0.05, 0.3);
 			// let y = random_double(0.2, 1.2);
 			let z = random_double(-0.3, 0.3);

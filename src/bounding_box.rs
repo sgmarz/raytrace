@@ -42,12 +42,7 @@ impl AxisAlignedBoundingBox {
             t_max_so_far = t1.min(t_max_so_far);
 
         }
-        if t_max <= t_min {
-            false
-        }
-        else {
-            true
-        }
+        t_max > t_min
     }
     pub fn surrounding_box(&self, other: &AxisAlignedBoundingBox) -> AxisAlignedBoundingBox {
         let small = Vec3::new(self.min().x().min(other.min().x()),

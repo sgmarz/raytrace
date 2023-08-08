@@ -82,7 +82,7 @@ pub fn random_large_scene() -> HitList {
 					let albedo = Arc::new(SolidColor::from_rgb(random_f64(), random_f64(), random_f64()));
 					let fuzz = random_double(0.0, 0.5);
 					let sphere_material = Material::new_metal(albedo, fuzz);
-					world.add(Arc::new(Sphere::new(center.clone(), 0.2, sphere_material)));
+					world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
 				} else {
 					// glass
 					let sphere_material = Material::new_dielectric(1.5);

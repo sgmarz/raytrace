@@ -98,6 +98,10 @@ impl HitList {
 		self.objects.len()
 	}
 
+	pub fn is_empty(&self) -> bool {
+		self.objects.is_empty()
+	}
+
 	pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
 		let mut closest_rec = HitRecord::default();
 		let mut hit_anything = false;
@@ -119,7 +123,7 @@ impl HitList {
 	}
 
 	pub fn bounding_box(&self, time0: f64, time1: f64) -> Option<AxisAlignedBoundingBox> {
-		if self.objects.len() == 0 {
+		if self.is_empty() {
 			return None;
 		}
 

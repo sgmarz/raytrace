@@ -35,9 +35,9 @@ impl Ray {
 		if depth <= 0 {
 			Color::new(0.0, 0.0, 0.0)
         } 
-        else if let Some(rec) = world.hit(&self, 0.001, std::f64::INFINITY) {
+        else if let Some(rec) = world.hit(self, 0.001, std::f64::INFINITY) {
             let emitted = rec.material().emitted(rec.u(), rec.v(), rec.point());
-			if let Some((attenuation, scattered)) = rec.material().scatter(&self, &rec) {
+			if let Some((attenuation, scattered)) = rec.material().scatter(self, &rec) {
 				emitted + &(attenuation * &scattered.color(background, world, depth - 1))
             } 
             else {
@@ -45,7 +45,7 @@ impl Ray {
 			}
         } 
         else {
-            background.clone()
+            *background
 		}
 	}
 }

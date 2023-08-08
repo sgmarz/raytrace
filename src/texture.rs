@@ -81,20 +81,13 @@ impl Texture for CheckeredTexture {
 
 // Perlin noise texture
 
+#[derive(Default)]
 pub struct NoiseTexture {
 	perlin: Perlin,
 }
 
 unsafe impl Send for NoiseTexture {}
 unsafe impl Sync for NoiseTexture {}
-
-impl NoiseTexture {
-	pub fn new() -> Self {
-		Self {
-			perlin: Perlin::new(),
-		}
-	}
-}
 
 impl Texture for NoiseTexture {
 	fn value(&self, _u: f64, _v: f64, p: &Vec3) -> Color {

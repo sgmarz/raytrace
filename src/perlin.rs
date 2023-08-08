@@ -71,12 +71,10 @@ impl Perlin {
 		p
 	}
 
-	fn permute(p: &mut Vec<usize>, n: usize) {
+	fn permute(p: &mut [usize], n: usize) {
 		for i in 1..n {
 			let target = random_int(0, i as i32) as usize;
-			let tmp = p[i];
-			p[i] = p[target];
-			p[target] = tmp;
+			p.swap(i, target);
 		}
 	}
 

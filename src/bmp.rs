@@ -9,21 +9,14 @@ use std::io::{BufWriter, Error, Write};
 use crate::vector::Color;
 use std::mem::size_of;
 
+#[derive(Default)]
 pub struct Row {
     cols: Vec<Color>
 }
 
-impl Default for Row {
-    fn default() -> Self {
-        Self {
-            cols: Vec::new()
-        }
-    }
-}
-
 impl Row {
     pub fn resize_width(&mut self, new_width: usize) {
-        self.cols.resize_with(new_width as usize, Default::default);
+        self.cols.resize_with(new_width, Default::default);
     }
 }
 
@@ -34,6 +27,7 @@ pub struct BmpPicture {
     rows: Vec<Row>
 }
 
+#[derive(Default)]
 #[repr(packed)]
 #[derive(Default)]
 struct BitmapFileHeader {
