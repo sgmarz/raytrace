@@ -77,7 +77,7 @@ impl BvhNode {
 
 impl Hitable for BvhNode {
 	fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<AxisAlignedBoundingBox> {
-		Some(self.bbox.clone())
+		Some(self.bbox)
 	}
 
 	fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {

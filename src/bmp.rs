@@ -35,27 +35,17 @@ pub struct BmpPicture {
 }
 
 #[repr(packed)]
+#[derive(Default)]
 struct BitmapFileHeader {
     pub signature: u16,
     pub size: u32,
-    pub rsv1: u16,
-    pub rsv2: u16,
+    pub _rsv1: u16,
+    pub _rsv2: u16,
     pub offset: u32
 }
 
-impl Default for BitmapFileHeader {
-    fn default() -> Self {
-        Self {
-            signature: 0,
-            size: 0,
-            rsv1: 0,
-            rsv2: 0,
-            offset: 0
-        }
-    }
-}
-
 #[repr(packed)]
+#[derive(Default)]
 struct BitmapInfoHeader {
     pub size: u32,
     pub width: i32,
@@ -68,24 +58,6 @@ struct BitmapInfoHeader {
     pub vres: i32,
     pub colors: u32,
     pub clrs_used: u32
-}
-
-impl Default for BitmapInfoHeader {
-    fn default() -> Self {
-        Self {
-            size: 0,
-            width: 0,
-            height: 0,
-            planes: 0,
-            bpp: 0,
-            compression: 0,
-            bmp_size: 0,
-            hres: 0,
-            vres: 0,
-            colors: 0,
-            clrs_used: 0
-        }
-    }
 }
 
 #[repr(packed)]
@@ -124,7 +96,7 @@ impl BmpPicture {
         let row_bytes = self.width as usize * 3;
         let padding = if row_bytes % 4 != 0 { 4 - row_bytes % 4 } else { 0 };
         let mut buffer = { let mut v = Vec::<u8>::new(); v.resize_with(size_of::<BitmapHeaders>(), Default::default); v };
-        let mut header = unsafe { (buffer.as_mut_ptr() as *mut BitmapHeaders).as_mut().unwrap() };
+        let header = unsafe { (buffer.as_mut_ptr() as *mut BitmapHeaders).as_mut().unwrap() };
         let mut bytes_written = 0;
 
         header.bfh.signature = 0x4d_42;
